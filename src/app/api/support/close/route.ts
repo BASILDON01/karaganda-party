@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/session";
 import { isAdmin } from "@/lib/admin";
 import { setTicketClosed, setTicketReopened } from "@/lib/support-read-store";
+import { deleteMessagesByUser } from "@/lib/support-store";
 
 export async function POST(req: Request) {
   const user = await getSessionUser();
@@ -31,5 +32,6 @@ export async function POST(req: Request) {
   }
 
   setTicketClosed(userId, user.id);
+  deleteMessagesByUser(userId);
   return NextResponse.json({ ok: true });
 }

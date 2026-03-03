@@ -59,6 +59,11 @@ export function getAllUserIdsWithMessages(): string[] {
   return Array.from(ids);
 }
 
+export function deleteMessagesByUser(userId: string): void {
+  const list = readAll().filter((m) => m.userId !== userId);
+  writeAll(list);
+}
+
 export function getConversationsWithLastMessage(): Array<{
   userId: string;
   lastMessage: SupportMessage;
