@@ -103,9 +103,17 @@ bot.command("login", async (ctx) => {
 });
 
 bot.hears("Войти", async (ctx) => {
-  await ctx.reply(`Открой страницу:\n${siteUrl}/login`, {
-    reply_markup: mainKeyboard(false),
-  });
+  const profile = ctx.from?.id ? await fetchBotUser(ctx.from.id) : null;
+  if (profile) {
+    await ctx.reply(
+      `Ты уже в аккаунте. Нажми «Мой профиль» для информации или открой:\n${siteUrl}/profile`,
+      { reply_markup: mainKeyboard(true) },
+    );
+  } else {
+    await ctx.reply(`Открой страницу:\n${siteUrl}/login`, {
+      reply_markup: mainKeyboard(false),
+    });
+  }
 });
 
 bot.hears("👤 Мой профиль", sendProfile);
