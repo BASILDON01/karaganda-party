@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { MessageCircle, X, Send } from 'lucide-react';
+import { MessageCircle, X, Send, User, Headphones } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/auth-context';
 import { toast } from 'sonner';
@@ -79,8 +79,8 @@ export function SupportChatWidget() {
       </button>
 
       {open && (
-        <div className="fixed bottom-24 right-6 z-50 w-[380px] max-w-[calc(100vw-3rem)] rounded-2xl border border-white/10 bg-card shadow-xl overflow-hidden flex flex-col max-h-[70vh]">
-          <div className="p-3 border-b border-white/10 flex items-center justify-between bg-primary/10">
+        <div className="fixed bottom-20 right-6 z-50 w-[400px] max-w-[calc(100vw-3rem)] rounded-2xl border border-white/10 bg-card shadow-xl overflow-hidden flex flex-col h-[75vh] min-h-[420px] max-h-[85vh]">
+          <div className="p-3 border-b border-white/10 flex items-center justify-between bg-primary/10 shrink-0">
             <span className="font-semibold">Поддержка FactorKZ</span>
             <Button variant="ghost" size="icon" onClick={() => setOpen(false)} className="h-8 w-8">
               <X className="w-4 h-4" />
@@ -88,22 +88,31 @@ export function SupportChatWidget() {
           </div>
           <div
             ref={listRef}
-            className="flex-1 overflow-y-auto p-3 space-y-2 min-h-[200px]"
+            className="flex-1 overflow-y-auto p-3 space-y-3 min-h-0"
           >
             {loading ? (
-              <p className="text-sm text-muted-foreground text-center py-4">Загрузка...</p>
+              <p className="text-sm text-muted-foreground text-center py-8">Загрузка...</p>
             ) : messages.length === 0 ? (
-              <p className="text-sm text-muted-foreground text-center py-4">
+              <p className="text-sm text-muted-foreground text-center py-8">
                 Напишите вопрос — мы ответим в ближайшее время.
               </p>
             ) : (
               messages.map((m) => (
                 <div
                   key={m.id}
-                  className={`flex ${m.author === 'user' ? 'justify-end' : 'justify-start'}`}
+                  className={`flex gap-2 ${m.author === 'user' ? 'flex-row-reverse' : 'flex-row'}`}
                 >
+                  <div className="shrink-0 w-8 h-8 rounded-full overflow-hidden bg-muted flex items-center justify-center">
+                    {m.author === 'user' && user?.avatar ? (
+                      <img src={user.avatar} alt="" className="w-full h-full object-cover" />
+                    ) : m.author === 'user' ? (
+                      <User className="w-4 h-4 text-muted-foreground" />
+                    ) : (
+                      <Headphones className="w-4 h-4 text-primary" />
+                    )}
+                  </div>
                   <div
-                    className={`max-w-[85%] rounded-xl px-3 py-2 text-sm ${
+                    className={`max-w-[80%] rounded-xl px-3 py-2 text-sm ${
                       m.author === 'user'
                         ? 'bg-primary text-primary-foreground'
                         : 'bg-muted text-foreground'
@@ -118,7 +127,7 @@ export function SupportChatWidget() {
               ))
             )}
           </div>
-          <div className="p-3 border-t border-white/10 flex gap-2">
+          <div className="p-3 border-t border-white/10 flex gap-2 shrink-0">
             <input
               type="text"
               value={input}

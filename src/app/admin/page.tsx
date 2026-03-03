@@ -413,7 +413,7 @@ export default function AdminPage() {
             </section>
 
             {/* Поддержка — чат с пользователями */}
-            <section className="mb-10">
+            <section className="mt-14 mb-10">
               <h2 className="text-xl font-bold tracking-wider mb-4 flex items-center gap-2">
                 <MessageCircle className="w-5 h-5 text-primary" />
                 ПОДДЕРЖКА
