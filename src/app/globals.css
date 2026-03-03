@@ -205,3 +205,11 @@
 .animate-float {
   animation: float 3s ease-in-out infinite;
 }
+
+/* Виджет чата поддержки — всегда справа внизу */
+.support-chat-anchor,
+.support-chat-panel {
+  left: auto !important;
+  right: 24px !important;
+  margin-left: 0 !important;
+}

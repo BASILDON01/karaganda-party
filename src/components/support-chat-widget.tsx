@@ -108,25 +108,40 @@ export function SupportChatWidget() {
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        className="fixed z-50 w-14 h-14 rounded-full bg-primary text-white shadow-lg shadow-primary/30 hover:shadow-primary/50 flex items-center justify-center transition-all hover:scale-105 relative"
-        style={{ bottom: '1.5rem', right: '1.5rem', left: 'auto' }}
-        aria-label="Чат с поддержкой"
+      <div
+        className="fixed z-50 support-chat-anchor"
+        style={{
+          bottom: '24px',
+          right: '24px',
+          left: 'auto',
+          marginLeft: 0,
+          marginRight: 0,
+        }}
       >
-        <MessageCircle className="w-6 h-6" />
-        {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 min-w-[22px] h-[22px] rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center px-1 shadow">
-            {unreadCount > 99 ? '99+' : unreadCount}
-          </span>
-        )}
-      </button>
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          className="w-14 h-14 rounded-full bg-primary text-white shadow-lg shadow-primary/30 hover:shadow-primary/50 flex items-center justify-center transition-all hover:scale-105 relative"
+          aria-label="Чат с поддержкой"
+        >
+          <MessageCircle className="w-6 h-6" />
+          {unreadCount > 0 && (
+            <span className="absolute -top-0.5 -right-0.5 min-w-[22px] h-[22px] rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center px-1 shadow">
+              {unreadCount > 99 ? '99+' : unreadCount}
+            </span>
+          )}
+        </button>
+      </div>
 
       {open && (
         <div
-          className="fixed z-50 w-[400px] max-w-[calc(100vw-3rem)] rounded-2xl border border-white/10 bg-card shadow-xl overflow-hidden flex flex-col h-[75vh] min-h-[420px] max-h-[85vh]"
-          style={{ bottom: 'calc(1.5rem + 3.5rem + 12px)', right: '1.5rem', left: 'auto' }}
+          className="fixed z-50 w-[400px] max-w-[calc(100vw-3rem)] rounded-2xl border border-white/10 bg-card shadow-xl overflow-hidden flex flex-col h-[75vh] min-h-[420px] max-h-[85vh] support-chat-panel"
+          style={{
+            bottom: 'calc(24px + 56px + 12px)',
+            right: '24px',
+            left: 'auto',
+            marginLeft: 0,
+          }}
         >
           <div className="p-3 border-b border-white/10 flex items-center justify-between bg-primary/10 shrink-0">
             <span className="font-semibold">Поддержка FactorKZ</span>
