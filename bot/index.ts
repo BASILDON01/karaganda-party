@@ -14,6 +14,14 @@ function requiredEnv(name: string): string {
 const token = requiredEnv("TELEGRAM_BOT_TOKEN");
 const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
+// Ссылки на чат и канал — можно переопределить в .env (TELEGRAM_CHAT_LINK, TELEGRAM_CHANNEL_LINK)
+const chatLink = process.env.TELEGRAM_CHAT_LINK || "https://t.me/+plmpo2wroWgyYTBi";
+const channelLink = process.env.TELEGRAM_CHANNEL_LINK || "https://t.me/+dYbpbBkALQ85Yjdi";
+
+function getLinksMessage(): string {
+  return `🔗 FactorKZ в Telegram\n\n💬 Чат: ${chatLink}\n📢 Канал: ${channelLink}`;
+}
+
 const bot = new Bot(token);
 
 function escapeHtml(s: string): string {
@@ -47,7 +55,7 @@ function mainKeyboard(hasProfile: boolean) {
   } else {
     kb.text("Войти").text("🎫 Проверить билет");
   }
-  kb.row().text("Помощь");
+  kb.row().text("Помощь").text("Новости");
   return kb.resized();
 }
 
@@ -154,6 +162,11 @@ bot.hears("Помощь", async (ctx) => {
     "По вопросам билетов и входа пиши в поддержку — контакты на сайте в разделе «Помощь».",
     { reply_markup: mainKeyboard(!!profile) },
   );
+});
+
+bot.hears("Новости", async (ctx) => {
+  const profile = ctx.from?.id ? await fetchBotUser(ctx.from.id) : null;
+  await ctx.reply(getLinksMessage(), { reply_markup: mainKeyboard(!!profile) });
 });
 
 bot.hears("🎫 Проверить билет", async (ctx) => {
