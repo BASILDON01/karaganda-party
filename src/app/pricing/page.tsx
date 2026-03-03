@@ -1,7 +1,6 @@
 import Link from "next/link";
 
 import {
-  ChevronLeft,
   Check,
   Sparkles,
   Zap,
@@ -67,14 +66,6 @@ export default function PricingPage() {
   return (
     <div className="min-h-screen pt-24 pb-16">
       <div className="container mx-auto px-4 max-w-4xl">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-white transition-colors mb-8"
-        >
-          <ChevronLeft className="w-4 h-4" />
-          На главную
-        </Link>
-
         <div className="text-center mb-12">
           <h1 className="text-3xl md:text-5xl font-bold tracking-wider mb-4">ТАРИФЫ</h1>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto">
@@ -129,18 +120,6 @@ export default function PricingPage() {
               </div>
             );
           })}
-        </div>
-
-        <div className="flex gap-4 justify-center">
-          <Link href="/">
-            <Button variant="outline" className="gap-2">
-              <ChevronLeft className="w-4 h-4" />
-              На главную
-            </Button>
-          </Link>
-          <Link href="/docs">
-            <Button variant="ghost">Документация</Button>
-          </Link>
         </div>
       </div>
     </div>

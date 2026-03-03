@@ -19,6 +19,8 @@ export interface Party {
   soldTickets: number;
   createdAt: string;
   updatedAt: string;
+  /** userId организатора (создателя) — для кабинета организатора */
+  createdBy?: string;
 }
 
 export interface Venue {

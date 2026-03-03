@@ -1,7 +1,4 @@
-import Link from "next/link";
-
 import {
-  ChevronLeft,
   FileText,
   Plus,
   Ticket,
@@ -9,8 +6,6 @@ import {
   Calendar,
   Settings,
 } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
 
 const sections = [
   {
@@ -81,14 +76,6 @@ export default function DocsPage() {
   return (
     <div className="min-h-screen pt-24 pb-16">
       <div className="container mx-auto px-4 max-w-3xl">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-white transition-colors mb-8"
-        >
-          <ChevronLeft className="w-4 h-4" />
-          На главную
-        </Link>
-
         <div className="flex items-center gap-3 mb-10">
           <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
             <FileText className="w-6 h-6 text-primary" />
@@ -126,21 +113,6 @@ export default function DocsPage() {
               </div>
             );
           })}
-        </div>
-
-        <div className="mt-10 flex gap-4">
-          <Link href="/create-party">
-            <Button className="gap-2">Создать пати</Button>
-          </Link>
-          <Link href="/pricing">
-            <Button variant="outline">Тарифы</Button>
-          </Link>
-          <Link href="/">
-            <Button variant="ghost" className="gap-2">
-              <ChevronLeft className="w-4 h-4" />
-              На главную
-            </Button>
-          </Link>
         </div>
       </div>
     </div>

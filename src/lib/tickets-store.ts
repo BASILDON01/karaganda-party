@@ -55,6 +55,11 @@ export function getTicketsByUser(userId: string): StoredTicket[] {
   return all.filter((t) => t.userId === userId);
 }
 
+export function getTicketsForParties(partyIds: string[]): StoredTicket[] {
+  const set = new Set(partyIds);
+  return readAllTickets().filter((t) => set.has(t.party.id));
+}
+
 export function getAllTickets(): StoredTicket[] {
   return readAllTickets();
 }

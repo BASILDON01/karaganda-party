@@ -5,6 +5,7 @@ import path from "node:path";
 import type { Party, Venue, Organizer, TicketType } from "./types";
 import type { PartySubmission } from "./types";
 import { getSeedParties } from "./seed-parties";
+import { getUserById } from "./users-store";
 
 const DATA_FILE = path.join(process.cwd(), "data", "parties.json");
 
@@ -95,6 +96,17 @@ export function addPartyFromSubmission(sub: PartySubmission): Party {
     maxPerOrder: 5,
   }));
   const totalTickets = ticketTypes.reduce((s, t) => s + t.quantity, 0);
+  const creator = getUserById(sub.createdBy);
+  const organizer: Organizer = creator
+    ? {
+        id: sub.createdBy,
+        name: creator.name,
+        logo: creator.avatar,
+        description: undefined,
+        verified: false,
+      }
+    : DEFAULT_ORGANIZER;
+
   const party: Party = {
     id: `party-${Date.now()}`,
     name: sub.name,
@@ -110,12 +122,13 @@ export function addPartyFromSubmission(sub: PartySubmission): Party {
     ticketTypes,
     dressCode: sub.dressCode || undefined,
     ageRestriction: sub.ageRestriction,
-    organizer: DEFAULT_ORGANIZER,
+    organizer,
     status: "upcoming",
     totalTickets,
     soldTickets: 0,
     createdAt: now,
     updatedAt: now,
+    createdBy: sub.createdBy,
   };
   list.push(party);
   writeAll(list);
@@ -127,6 +140,29 @@ export function deletePartyById(partyId: string): boolean {
   const idx = list.findIndex((p) => p.id === partyId);
   if (idx === -1) return false;
   list.splice(idx, 1);
+  writeAll(list);
+  return true;
+}
+
+export function getPartiesByOrganizer(userId: string): Party[] {
+  return readAll()
+    .filter((p) => p.createdBy === userId)
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+}
+
+export function incrementPartySold(
+  partyId: string,
+  ticketTypeId: string,
+  quantity: number
+): boolean {
+  const list = readAll();
+  const party = list.find((p) => p.id === partyId);
+  if (!party) return false;
+  const tt = party.ticketTypes.find((t) => t.id === ticketTypeId);
+  if (!tt) return false;
+  tt.sold = (tt.sold ?? 0) + quantity;
+  party.soldTickets = (party.soldTickets ?? 0) + quantity;
+  party.updatedAt = new Date().toISOString();
   writeAll(list);
   return true;
 }

@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getSessionUser } from "@/lib/session";
 import { addPurchasedTickets } from "@/lib/tickets-store";
-import { getPartyBySlug } from "@/lib/parties-store";
+import { getPartyBySlug, incrementPartySold } from "@/lib/parties-store";
 
 type Body = {
   partySlug: string;
@@ -50,6 +50,10 @@ export async function POST(req: Request) {
     ticketSelections,
     paymentMethod: body.paymentMethod,
   });
+
+  for (const { ticketType, quantity } of ticketSelections) {
+    incrementPartySold(party.id, ticketType.id, quantity);
+  }
 
   return NextResponse.json({ ok: true, tickets: created });
 }
