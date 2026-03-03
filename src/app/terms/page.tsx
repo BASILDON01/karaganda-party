@@ -1,18 +1,96 @@
 import Link from "next/link";
 
+import { ChevronLeft, FileText } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 
 export default function TermsPage() {
   return (
     <div className="min-h-screen pt-24 pb-16">
       <div className="container mx-auto px-4 max-w-2xl">
-        <h1 className="text-4xl font-bold tracking-wider mb-6">Условия использования</h1>
-        <p className="text-muted-foreground mb-8">
-          Текст условий использования будет добавлен. Использование сервиса FactorKZ подразумевает согласие с правилами платформы.
-        </p>
-        <Link href="/">
-          <Button variant="outline">На главную</Button>
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-muted-foreground hover:text-white transition-colors mb-8"
+        >
+          <ChevronLeft className="w-4 h-4" />
+          На главную
         </Link>
+
+        <div className="glow-card rounded-2xl p-8 mb-8">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
+              <FileText className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold tracking-wider">Условия использования</h1>
+              <p className="text-muted-foreground text-sm mt-1">FactorKZ — платформа продажи билетов</p>
+            </div>
+          </div>
+
+          <div className="space-y-6 text-muted-foreground leading-relaxed">
+            <section>
+              <h2 className="text-lg font-semibold text-white mb-2">1. Общие положения</h2>
+              <p>
+                Использование сайта factorkz.com и сервисов платформы FactorKZ означает принятие настоящих условий.
+                Платформа предоставляет услуги по продаже билетов на мероприятия (вечеринки, концерты и др.) в
+                Караганде и других городах. Организаторы мероприятий несут ответственность за проведение событий.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-lg font-semibold text-white mb-2">2. Покупка билетов</h2>
+              <p>
+                Оплата билетов производится через платёжные системы (Kaspi, Halyk Bank и др.). После оплаты билет
+                появляется в разделе «Мои билеты». QR-код билета необходимо предъявить на входе. Билет
+                действителен только на указанное мероприятие и дату. Перепродажа билетов третьим лицам разрешена по
+                вашему усмотрению, однако вход по билету осуществляется по предъявлению действующего QR-кода.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-lg font-semibold text-white mb-2">3. Возврат средств</h2>
+              <p>
+                Возврат средств за билет возможен не позднее чем за 24 часа до начала мероприятия при условии
+                отмены или переноса события организатором. Заявки на возврат принимаются через раздел «Помощь» или
+                по контактам поддержки. Срок возврата денежных средств — до 10 рабочих дней.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-lg font-semibold text-white mb-2">4. Авторизация через Telegram</h2>
+              <p>
+                Вход на платформу осуществляется через аккаунт Telegram. Мы не храним пароли. Использование
+                сервиса после авторизации означает согласие с политикой конфиденциальности и условиями
+                использования.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-lg font-semibold text-white mb-2">5. Ограничение ответственности</h2>
+              <p>
+                FactorKZ не несёт ответственности за отмену или перенос мероприятий организаторами, за качество
+                проведения событий и действия третьих лиц. В случае отмены мероприятия возврат средств
+                осуществляется в соответствии с разделом 3.
+              </p>
+            </section>
+
+            <p className="text-sm pt-4 border-t border-white/10">
+              Дата последнего обновления: март 2026. При возникновении вопросов обращайтесь в поддержку.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex gap-4">
+          <Link href="/">
+            <Button variant="outline" className="gap-2">
+              <ChevronLeft className="w-4 h-4" />
+              На главную
+            </Button>
+          </Link>
+          <Link href="/privacy">
+            <Button variant="ghost">Политика конфиденциальности</Button>
+          </Link>
+        </div>
       </div>
     </div>
   );

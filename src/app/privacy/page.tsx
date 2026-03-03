@@ -1,18 +1,101 @@
 import Link from "next/link";
 
+import { ChevronLeft, Shield } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 
 export default function PrivacyPage() {
   return (
     <div className="min-h-screen pt-24 pb-16">
       <div className="container mx-auto px-4 max-w-2xl">
-        <h1 className="text-4xl font-bold tracking-wider mb-6">Политика конфиденциальности</h1>
-        <p className="text-muted-foreground mb-8">
-          Текст политики конфиденциальности будет добавлен. Мы храним только необходимые данные для работы сервиса и билетов.
-        </p>
-        <Link href="/">
-          <Button variant="outline">На главную</Button>
+        <Link
+          href="/"
+          className="inline-flex items-center gap-2 text-muted-foreground hover:text-white transition-colors mb-8"
+        >
+          <ChevronLeft className="w-4 h-4" />
+          На главную
         </Link>
+
+        <div className="glow-card rounded-2xl p-8 mb-8">
+          <div className="flex items-center gap-3 mb-8">
+            <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
+              <Shield className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-3xl md:text-4xl font-bold tracking-wider">
+                Политика конфиденциальности
+              </h1>
+              <p className="text-muted-foreground text-sm mt-1">FactorKZ — как мы обрабатываем данные</p>
+            </div>
+          </div>
+
+          <div className="space-y-6 text-muted-foreground leading-relaxed">
+            <section>
+              <h2 className="text-lg font-semibold text-white mb-2">1. Какие данные мы собираем</h2>
+              <p>
+                При входе через Telegram мы получаем от сервиса Telegram: идентификатор пользователя, имя,
+                фамилию (при наличии), имя пользователя (username) и ссылку на фото профиля. Эти данные
+                необходимы для отображения вашего профиля и привязки купленных билетов к аккаунту. Мы не
+                запрашиваем и не храним пароли — авторизация полностью осуществляется через Telegram.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-lg font-semibold text-white mb-2">2. Как мы используем данные</h2>
+              <p>
+                Данные вашего профиля используются для отображения имени и аватара в интерфейсе, для связи
+                билетов с вашим аккаунтом и для обратной связи при обращении в поддержку. Мы не передаём
+                персональные данные третьим лицам для рекламы или маркетинга. Данные могут передаваться
+                организаторам мероприятий только в объёме, необходимом для проверки билетов на входе (например,
+                номер заказа или код билета).
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-lg font-semibold text-white mb-2">3. Хранение и сессии</h2>
+              <p>
+                Для работы сессии мы используем зашифрованный токен (JWT) в cookie вашего браузера. Данные
+                профиля и список купленных билетов хранятся на наших серверах. Вы можете в любой момент выйти
+                из аккаунта — при этом сессия будет удалена, данные профиля останутся в нашей базе для истории
+                покупок и возможности обращений в поддержку.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-lg font-semibold text-white mb-2">4. Безопасность</h2>
+              <p>
+                Мы применяем стандартные меры защиты: шифрование соединения (HTTPS), защищённое хранение
+                сессий и ограничение доступа к персональным данным. Токен бота Telegram и секреты приложения
+                не передаются в браузер и используются только на сервере.
+              </p>
+            </section>
+
+            <section>
+              <h2 className="text-lg font-semibold text-white mb-2">5. Ваши права</h2>
+              <p>
+                Вы можете запросить информацию о хранящихся данных или их удаление, обратившись в поддержку
+                по контактам, указанным на сайте. Мы обязуемся рассмотреть запрос в разумные сроки.
+              </p>
+            </section>
+
+            <p className="text-sm pt-4 border-t border-white/10">
+              Дата последнего обновления: март 2026. Использование сервиса означает согласие с настоящей
+              политикой.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex gap-4">
+          <Link href="/">
+            <Button variant="outline" className="gap-2">
+              <ChevronLeft className="w-4 h-4" />
+              На главную
+            </Button>
+          </Link>
+          <Link href="/terms">
+            <Button variant="ghost">Условия использования</Button>
+          </Link>
+        </div>
       </div>
     </div>
   );
