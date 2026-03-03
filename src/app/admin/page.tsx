@@ -46,10 +46,17 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [supportConversations, setSupportConversations] = useState<Array<{ userId: string; messages: SupportMsg[] }>>([]);
+  const [supportConversations, setSupportConversations] = useState<Array<{
+    userId: string;
+    messages: SupportMsg[];
+    unreadCount?: number;
+    isClosed?: boolean;
+    closedAt?: string;
+  }>>([]);
   const [selectedSupportUserId, setSelectedSupportUserId] = useState<string | null>(null);
   const [supportReply, setSupportReply] = useState('');
   const [supportSending, setSupportSending] = useState(false);
+  const [supportClosing, setSupportClosing] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -177,7 +184,7 @@ export default function AdminPage() {
       if (res.ok && data?.ok && data.message) {
         setSupportConversations((prev) =>
           prev.map((c) =>
-            c.userId === userId ? { ...c, messages: [...c.messages, data.message] } : c
+            c.userId === userId ? { ...c, messages: [...c.messages, data.message], isClosed: false } : c
           )
         );
         setSupportReply('');
@@ -188,6 +195,32 @@ export default function AdminPage() {
       toast.error('Ошибка');
     } finally {
       setSupportSending(false);
+    }
+  }
+
+  async function closeOrReopenTicket(userId: string, reopen: boolean) {
+    setSupportClosing(userId);
+    try {
+      const res = await fetch('/api/support/close', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, reopen }),
+      });
+      const data = await res.json();
+      if (res.ok && data?.ok) {
+        setSupportConversations((prev) =>
+          prev.map((c) =>
+            c.userId === userId ? { ...c, isClosed: !reopen, closedAt: reopen ? undefined : new Date().toISOString() } : c
+          )
+        );
+        toast.success(reopen ? 'Тикет открыт' : 'Тикет закрыт');
+      } else {
+        toast.error('Ошибка');
+      }
+    } catch {
+      toast.error('Ошибка');
+    } finally {
+      setSupportClosing(null);
     }
   }
 
@@ -424,23 +457,49 @@ export default function AdminPage() {
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {supportConversations.map(({ userId, messages }) => (
+                  {supportConversations.map(({ userId, messages, unreadCount = 0, isClosed }) => (
                     <div key={userId} className="glow-card rounded-2xl overflow-hidden">
                       <button
                         type="button"
                         onClick={() => {
                           setSupportReply('');
                           setSelectedSupportUserId((id) => (id === userId ? null : userId));
+                          if (userId) {
+                            fetch('/api/support/read', {
+                              method: 'POST',
+                              credentials: 'include',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({ userId }),
+                            }).catch(() => {});
+                            setSupportConversations((prev) =>
+                              prev.map((c) => (c.userId === userId ? { ...c, unreadCount: 0 } : c))
+                            );
+                          }
                         }}
                         className="w-full p-4 flex items-center justify-between text-left hover:bg-white/5 transition-colors"
                       >
-                        <span className="font-medium">Telegram ID: {userId}</span>
+                        <span className="font-medium flex items-center gap-2">
+                          Telegram ID: {userId}
+                          {unreadCount > 0 && (
+                            <span className="min-w-[22px] h-[22px] rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center px-1">
+                              {unreadCount > 99 ? '99+' : unreadCount}
+                            </span>
+                          )}
+                          {isClosed && (
+                            <span className="text-xs bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded">Закрыт</span>
+                          )}
+                        </span>
                         <span className="text-sm text-muted-foreground">
                           {messages.length} сообщ.
                         </span>
                       </button>
                       {selectedSupportUserId === userId && (
                         <div className="border-t border-white/10 p-4 space-y-3">
+                          {isClosed && (
+                            <div className="text-sm text-amber-400 bg-amber-500/10 rounded-lg px-3 py-2">
+                              Тикет закрыт. Пользователь увидит это в чате. Можно открыть снова кнопкой ниже.
+                            </div>
+                          )}
                           <div className="max-h-64 overflow-y-auto space-y-2">
                             {messages.map((m) => (
                               <div
@@ -462,7 +521,7 @@ export default function AdminPage() {
                               </div>
                             ))}
                           </div>
-                          <div className="flex gap-2">
+                          <div className="flex gap-2 flex-wrap">
                             <input
                               type="text"
                               value={selectedSupportUserId === userId ? supportReply : ''}
@@ -471,7 +530,7 @@ export default function AdminPage() {
                                 e.key === 'Enter' && sendSupportReply(userId)
                               }
                               placeholder="Ответить..."
-                              className="flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                              className="flex-1 min-w-0 rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
                             />
                             <Button
                               size="sm"
@@ -482,6 +541,25 @@ export default function AdminPage() {
                               <Send className="w-4 h-4" />
                               Отправить
                             </Button>
+                            {isClosed ? (
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => closeOrReopenTicket(userId, true)}
+                                disabled={supportClosing === userId}
+                              >
+                                Открыть тикет
+                              </Button>
+                            ) : (
+                              <Button
+                                size="sm"
+                                variant="destructive"
+                                onClick={() => closeOrReopenTicket(userId, false)}
+                                disabled={supportClosing === userId}
+                              >
+                                Закрыть тикет
+                              </Button>
+                            )}
                           </div>
                         </div>
                       )}

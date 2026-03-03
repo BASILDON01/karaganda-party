@@ -18,6 +18,8 @@ export function SupportChatWidget() {
   const { user, isAuthenticated } = useAuth();
   const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState<SupportMessage[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [isClosed, setIsClosed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
@@ -39,6 +41,8 @@ export function SupportChatWidget() {
         if (data?.ok && Array.isArray(data.messages)) {
           setMessages(data.messages);
         }
+        if (data?.ok && typeof data.unreadCount === 'number') setUnreadCount(data.unreadCount);
+        if (data?.ok && typeof data.isClosed === 'boolean') setIsClosed(data.isClosed);
       })
       .catch(() => {});
   }, [isAuthenticated]);
@@ -52,6 +56,9 @@ export function SupportChatWidget() {
     if (!open || !isAuthenticated) return;
     setLoading(true);
     fetchMessages()
+      .then(() => {
+        fetch('/api/support/read', { method: 'POST', credentials: 'include', headers: { 'Content-Type': 'application/json' }, body: '{}' }).catch(() => {});
+      })
       .catch(() => toast.error('Не удалось загрузить сообщения'))
       .finally(() => setLoading(false));
   }, [open, isAuthenticated, fetchMessages]);
@@ -84,6 +91,7 @@ export function SupportChatWidget() {
       const data = await res.json();
       if (res.ok && data?.ok && data.message) {
         setMessages((prev) => [...prev, data.message]);
+        setIsClosed(false);
       } else {
         toast.error('Не удалось отправить');
         setInput(text);
@@ -103,10 +111,15 @@ export function SupportChatWidget() {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-primary text-white shadow-lg shadow-primary/30 hover:shadow-primary/50 flex items-center justify-center transition-all hover:scale-105"
+        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-primary text-white shadow-lg shadow-primary/30 hover:shadow-primary/50 flex items-center justify-center transition-all hover:scale-105 relative"
         aria-label="Чат с поддержкой"
       >
         <MessageCircle className="w-6 h-6" />
+        {unreadCount > 0 && (
+          <span className="absolute -top-0.5 -right-0.5 min-w-[22px] h-[22px] rounded-full bg-red-500 text-white text-xs font-bold flex items-center justify-center px-1 shadow">
+            {unreadCount > 99 ? '99+' : unreadCount}
+          </span>
+        )}
       </button>
 
       {open && (
@@ -119,6 +132,11 @@ export function SupportChatWidget() {
               <X className="w-4 h-4" />
             </Button>
           </div>
+          {isClosed && (
+            <div className="px-3 py-2 bg-amber-500/20 border-b border-amber-500/30 text-amber-200 text-sm shrink-0">
+              Обращение закрыто. Напишите сообщение, чтобы открыть тикет снова.
+            </div>
+          )}
           <div
             ref={listRef}
             className="flex-1 overflow-y-auto p-3 space-y-3 min-h-0"

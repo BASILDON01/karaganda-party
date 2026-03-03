@@ -2,6 +2,16 @@ import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/session";
 import { isAdmin } from "@/lib/admin";
 import { addMessage, getMessagesByUser, getAllUserIdsWithMessages } from "@/lib/support-store";
+import {
+  getUserLastRead,
+  setUserLastRead,
+  getAdminLastRead,
+  setAdminLastRead,
+  getClosedTicket,
+  setTicketReopened,
+  countUnreadForUser,
+  countUnreadForAdmin,
+} from "@/lib/support-read-store";
 
 const NO_CACHE_HEADERS = {
   "Cache-Control": "no-store, no-cache, must-revalidate",
@@ -20,20 +30,48 @@ export async function GET(req: Request) {
 
   if (isAdmin(user.id) && conversationsOnly) {
     const userIds = getAllUserIdsWithMessages();
-    const conversations = userIds.map((uid) => ({
-      userId: uid,
-      messages: getMessagesByUser(uid),
-    }));
+    const conversations = userIds.map((uid) => {
+      const messages = getMessagesByUser(uid);
+      const lastRead = getAdminLastRead(uid);
+      const unreadCount = countUnreadForAdmin(messages, lastRead);
+      const closed = getClosedTicket(uid);
+      return {
+        userId: uid,
+        messages,
+        unreadCount,
+        isClosed: !!closed,
+        closedAt: closed?.closedAt,
+      };
+    });
     return NextResponse.json({ ok: true, conversations });
   }
 
   if (isAdmin(user.id) && forUserId) {
     const messages = getMessagesByUser(forUserId);
-    return NextResponse.json({ ok: true, messages, asAdmin: true });
+    const closed = getClosedTicket(forUserId);
+    return NextResponse.json({
+      ok: true,
+      messages,
+      asAdmin: true,
+      isClosed: !!closed,
+      closedAt: closed?.closedAt,
+    });
   }
 
   const messages = getMessagesByUser(user.id);
-  return NextResponse.json({ ok: true, messages }, { headers: NO_CACHE_HEADERS });
+  const lastRead = getUserLastRead(user.id);
+  const unreadCount = countUnreadForUser(messages, lastRead);
+  const closed = getClosedTicket(user.id);
+  return NextResponse.json(
+    {
+      ok: true,
+      messages,
+      unreadCount,
+      isClosed: !!closed,
+      closedAt: closed?.closedAt,
+    },
+    { headers: NO_CACHE_HEADERS }
+  );
 }
 
 export async function POST(req: Request) {
@@ -59,6 +97,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: true, message: msg });
   }
 
+  setTicketReopened(user.id);
   const msg = addMessage(user.id, "user", text);
   return NextResponse.json({ ok: true, message: msg });
 }
