@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import type { User } from "@/lib/types";
 import { setSessionCookie } from "@/lib/session";
+import { saveUser } from "@/lib/users-store";
 import { verifyTelegramAuth, type TelegramAuthPayload } from "@/lib/telegram-auth";
 
 export async function POST(req: Request) {
@@ -25,6 +26,7 @@ export async function POST(req: Request) {
   };
 
   await setSessionCookie(user);
+  saveUser({ id: user.id, name: user.name, avatar: user.avatar, createdAt: user.createdAt });
 
   return NextResponse.json({ ok: true, user });
 }
