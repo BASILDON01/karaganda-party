@@ -37,9 +37,17 @@ export async function PATCH(
     return NextResponse.json({ ok: false, error: "invalid_body" }, { status: 400 });
   }
 
+  const lineup =
+    body.lineup?.map((a, i) => ({
+      id: a.id ?? `artist-${Date.now()}-${i}`,
+      name: a.name,
+      role: a.role,
+      image: a.image,
+    }));
+
   const party = updateOrganizerParty(id, user.id, {
     gallery: body.gallery,
-    lineup: body.lineup,
+    lineup,
     ticketTypes: body.ticketTypes,
   });
 
