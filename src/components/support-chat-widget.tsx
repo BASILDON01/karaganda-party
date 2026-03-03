@@ -23,16 +23,28 @@ export function SupportChatWidget() {
   const [sending, setSending] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
 
+  const fetchMessages = () => {
+    if (!isAuthenticated) return;
+    return fetch('/api/support/messages', { credentials: 'include', cache: 'no-store' })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.ok && Array.isArray(data.messages)) setMessages(data.messages);
+      })
+      .catch(() => {});
+  };
+
   useEffect(() => {
     if (!open || !isAuthenticated) return;
     setLoading(true);
-    fetch('/api/support/messages')
-      .then((res) => (res.ok ? res.json() : null))
-      .then((data) => {
-        if (data?.ok && data.messages) setMessages(data.messages);
-      })
-      .catch(() => toast.error('Не удалось загрузить сообщения'))
+    fetchMessages()
+      ?.catch(() => toast.error('Не удалось загрузить сообщения'))
       .finally(() => setLoading(false));
+  }, [open, isAuthenticated]);
+
+  useEffect(() => {
+    if (!open || !isAuthenticated) return;
+    const interval = setInterval(() => fetchMessages(), 4000);
+    return () => clearInterval(interval);
   }, [open, isAuthenticated]);
 
   useEffect(() => {
@@ -49,6 +61,7 @@ export function SupportChatWidget() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ text }),
+        credentials: 'include',
       });
       const data = await res.json();
       if (res.ok && data?.ok && data.message) {
@@ -79,7 +92,9 @@ export function SupportChatWidget() {
       </button>
 
       {open && (
-        <div className="fixed bottom-20 right-6 z-50 w-[400px] max-w-[calc(100vw-3rem)] rounded-2xl border border-white/10 bg-card shadow-xl overflow-hidden flex flex-col h-[75vh] min-h-[420px] max-h-[85vh]">
+        <div className="fixed right-6 z-50 w-[400px] max-w-[calc(100vw-3rem)] rounded-2xl border border-white/10 bg-card shadow-xl overflow-hidden flex flex-col h-[75vh] min-h-[420px] max-h-[85vh]"
+          style={{ bottom: 'calc(1.5rem + 3.5rem + 12px)' }}
+        >
           <div className="p-3 border-b border-white/10 flex items-center justify-between bg-primary/10 shrink-0">
             <span className="font-semibold">Поддержка FactorKZ</span>
             <Button variant="ghost" size="icon" onClick={() => setOpen(false)} className="h-8 w-8">
