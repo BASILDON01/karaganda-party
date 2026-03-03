@@ -37,6 +37,24 @@ export default function MyTicketsPage() {
   const activeTickets = getActiveTickets();
   const usedTickets = getUsedTickets();
 
+  const groupTickets = (list: PurchasedTicket[]) => {
+    const groups: PurchasedTicket[][] = [];
+    const seen = new Set<string>();
+    for (const t of list) {
+      const key = `${t.party.id}-${t.ticketType.id}-${t.purchasedAt}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const group = list.filter(
+        (x) => x.party.id === t.party.id && x.ticketType.id === t.ticketType.id && x.purchasedAt === t.purchasedAt
+      );
+      groups.push(group);
+    }
+    return groups;
+  };
+
+  const activeGroups = groupTickets(activeTickets);
+  const usedGroups = groupTickets(usedTickets);
+
   const copyQRCode = (code: string) => {
     navigator.clipboard.writeText(code);
     toast.success('QR-код скопирован!');
@@ -86,7 +104,7 @@ export default function MyTicketsPage() {
         ) : (
           <div className="space-y-8">
             {/* Active tickets */}
-            {activeTickets.length > 0 && (
+            {activeGroups.length > 0 && (
               <div className="space-y-4">
                 <h2 className="text-xl font-bold flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full bg-green-500" />
@@ -94,126 +112,117 @@ export default function MyTicketsPage() {
                 </h2>
 
                 <div className="grid gap-6">
-                  {activeTickets.map((ticket) => (
-                    <div
-                      key={ticket.id}
-                      className="glow-card rounded-2xl overflow-hidden"
-                    >
-                      <div className="flex flex-col md:flex-row">
-                        {/* Party image */}
-                        <div className="relative w-full md:w-64 h-48 md:h-auto shrink-0">
-                          <Image
-                            src={ticket.party.image}
-                            alt={ticket.party.name}
-                            fill
-                            className="object-cover"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/50 md:bg-gradient-to-b md:from-transparent md:to-black/50" />
-                        </div>
-
-                        {/* Ticket info */}
-                        <div className="flex-1 p-6 space-y-4">
-                          <div className="flex items-start justify-between">
-                            <div>
-                              <Badge className="bg-green-500/20 text-green-500 border-0 mb-2">
-                                Активен
-                              </Badge>
-                              <h3 className="text-2xl font-bold tracking-wide">
-                                {ticket.party.name}
-                              </h3>
-                              <p className="text-muted-foreground">
-                                {ticket.ticketType.name} x {ticket.quantity}
-                              </p>
-                            </div>
-                            <div className="text-right">
-                              <span className="text-sm text-muted-foreground">Сумма</span>
-                              <p className="text-xl font-bold">
-                                {formatPrice(ticket.ticketType.price * ticket.quantity)}
-                              </p>
-                            </div>
+                  {activeGroups.map((group) => {
+                    const ticket = group[0];
+                    const count = group.length;
+                    const totalSum = group.reduce((s, t) => s + t.ticketType.price * t.quantity, 0);
+                    const groupKey = `${ticket.party.id}-${ticket.ticketType.id}-${ticket.purchasedAt}`;
+                    const isExpanded = selectedTicket === groupKey;
+                    return (
+                      <div key={groupKey} className="glow-card rounded-2xl overflow-hidden">
+                        <div className="flex flex-col md:flex-row">
+                          <div className="relative w-full md:w-64 h-48 md:h-auto shrink-0">
+                            <Image
+                              src={ticket.party.image}
+                              alt={ticket.party.name}
+                              fill
+                              className="object-cover"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-r from-transparent to-black/50 md:bg-gradient-to-b md:from-transparent md:to-black/50" />
                           </div>
-
-                          <div className="flex flex-wrap gap-4 text-sm">
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <Calendar className="w-4 h-4 text-primary" />
-                              <span>{formatDate(ticket.party.date)}</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <Clock className="w-4 h-4 text-primary" />
-                              <span>{ticket.party.time}</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-muted-foreground">
-                              <MapPin className="w-4 h-4 text-primary" />
-                              <span>{ticket.party.venue.name}</span>
-                            </div>
-                          </div>
-
-                          <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                            <Button
-                              onClick={() => setSelectedTicket(selectedTicket === ticket.id ? null : ticket.id)}
-                              className="gap-2"
-                            >
-                              <QrCode className="w-4 h-4" />
-                              {selectedTicket === ticket.id ? 'Скрыть QR-код' : 'Показать QR-код'}
-                            </Button>
-                            <Button variant="outline" className="gap-2" onClick={() => downloadPDF(ticket)}>
-                              <Download className="w-4 h-4" />
-                              Скачать PDF
-                            </Button>
-                            <Link href={`/party/${ticket.party.slug}`}>
-                              <Button variant="ghost" className="gap-2 w-full sm:w-auto">
-                                Подробнее
-                                <ChevronRight className="w-4 h-4" />
-                              </Button>
-                            </Link>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* QR Code section */}
-                      {selectedTicket === ticket.id && (
-                        <div className="border-t border-white/10 p-6 bg-black/30">
-                          <div className="flex flex-col md:flex-row items-center gap-6">
-                            {/* QR placeholder - in real app use a QR library */}
-                            <div className="w-48 h-48 bg-white rounded-xl flex items-center justify-center p-4">
-                              <div className="w-full h-full flex items-center justify-center">
-                                <QrCode className="w-32 h-32 text-black" />
+                          <div className="flex-1 p-6 space-y-4">
+                            <div className="flex items-start justify-between">
+                              <div>
+                                <Badge className="bg-green-500/20 text-green-500 border-0 mb-2">Активен</Badge>
+                                <h3 className="text-2xl font-bold tracking-wide">{ticket.party.name}</h3>
+                                <p className="text-muted-foreground">
+                                  {ticket.ticketType.name} x {count}
+                                </p>
+                              </div>
+                              <div className="text-right">
+                                <span className="text-sm text-muted-foreground">Сумма</span>
+                                <p className="text-xl font-bold">{formatPrice(totalSum)}</p>
                               </div>
                             </div>
-
-                            <div className="flex-1 text-center md:text-left">
-                              <h4 className="text-lg font-bold mb-2">Код билета</h4>
-                              <button
-                                onClick={() => copyQRCode(ticket.qrCode)}
-                                className="font-mono text-sm text-muted-foreground mb-4 bg-white/5 rounded-lg px-4 py-2 inline-block hover:bg-white/10 transition-colors cursor-pointer"
-                              >
-                                {ticket.qrCode}
-                                <span className="ml-2 text-primary">Копировать</span>
-                              </button>
-                              <p className="text-sm text-muted-foreground mb-4">
-                                Покажите этот QR-код на входе или отправьте его в наш Telegram-бот для проверки
-                              </p>
+                            <div className="flex flex-wrap gap-4 text-sm">
+                              <div className="flex items-center gap-2 text-muted-foreground">
+                                <Calendar className="w-4 h-4 text-primary" />
+                                <span>{formatDate(ticket.party.date)}</span>
+                              </div>
+                              <div className="flex items-center gap-2 text-muted-foreground">
+                                <Clock className="w-4 h-4 text-primary" />
+                                <span>{ticket.party.time}</span>
+                              </div>
+                              <div className="flex items-center gap-2 text-muted-foreground">
+                                <MapPin className="w-4 h-4 text-primary" />
+                                <span>{ticket.party.venue.name}</span>
+                              </div>
+                            </div>
+                            <div className="flex flex-col sm:flex-row gap-3 pt-2">
                               <Button
-                                variant="outline"
-                                size="sm"
+                                onClick={() => setSelectedTicket(isExpanded ? null : groupKey)}
                                 className="gap-2"
-                                onClick={() => openTelegramBot(ticket.qrCode)}
                               >
-                                <Send className="w-4 h-4" />
-                                Открыть в Telegram
+                                <QrCode className="w-4 h-4" />
+                                {isExpanded ? 'Скрыть QR-коды' : `Показать QR-коды (${count})`}
                               </Button>
+                              <Button variant="outline" className="gap-2" onClick={() => downloadPDF(ticket)}>
+                                <Download className="w-4 h-4" />
+                                Скачать PDF
+                              </Button>
+                              <Link href={`/party/${ticket.party.slug}`}>
+                                <Button variant="ghost" className="gap-2 w-full sm:w-auto">
+                                  Подробнее
+                                  <ChevronRight className="w-4 h-4" />
+                                </Button>
+                              </Link>
                             </div>
                           </div>
                         </div>
-                      )}
-                    </div>
-                  ))}
+                        {isExpanded && (
+                          <div className="border-t border-white/10 p-6 bg-black/30 space-y-6">
+                            {group.map((t, i) => (
+                              <div key={t.id} className="flex flex-col md:flex-row items-center gap-6">
+                                <div className="w-48 h-48 bg-white rounded-xl flex items-center justify-center p-4 shrink-0">
+                                  <QrCode className="w-32 h-32 text-black" />
+                                </div>
+                                <div className="flex-1 text-center md:text-left">
+                                  <h4 className="text-lg font-bold mb-2">
+                                    Билет {count > 1 ? `${i + 1} из ${count}` : ''}
+                                  </h4>
+                                  <button
+                                    onClick={() => copyQRCode(t.qrCode)}
+                                    className="font-mono text-sm text-muted-foreground mb-4 bg-white/5 rounded-lg px-4 py-2 inline-block hover:bg-white/10 transition-colors cursor-pointer"
+                                  >
+                                    {t.qrCode}
+                                    <span className="ml-2 text-primary">Копировать</span>
+                                  </button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="gap-2"
+                                    onClick={() => openTelegramBot(t.qrCode)}
+                                  >
+                                    <Send className="w-4 h-4" />
+                                    Открыть в Telegram
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+                            <p className="text-sm text-muted-foreground">
+                              Покажите QR-код на входе или отправьте его в наш Telegram-бот для проверки
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
 
             {/* Used tickets */}
-            {usedTickets.length > 0 && (
+            {usedGroups.length > 0 && (
               <div className="space-y-4">
                 <h2 className="text-xl font-bold flex items-center gap-2 text-muted-foreground">
                   <div className="w-2 h-2 rounded-full bg-gray-500" />
@@ -221,8 +230,12 @@ export default function MyTicketsPage() {
                 </h2>
 
                 <div className="grid gap-4 opacity-60">
-                  {usedTickets.map((ticket) => (
-                    <div key={ticket.id} className="glow-card rounded-xl p-4 flex items-center gap-4">
+                  {usedGroups.map((group) => {
+                    const ticket = group[0];
+                    const count = group.length;
+                    const groupKey = `${ticket.party.id}-${ticket.ticketType.id}-${ticket.purchasedAt}`;
+                    return (
+                    <div key={groupKey} className="glow-card rounded-xl p-4 flex items-center gap-4">
                       <div className="relative w-16 h-16 rounded-lg overflow-hidden shrink-0">
                         <Image
                           src={ticket.party.image}
@@ -234,12 +247,13 @@ export default function MyTicketsPage() {
                       <div className="flex-1">
                         <h3 className="font-bold">{ticket.party.name}</h3>
                         <p className="text-sm text-muted-foreground">
-                          {ticket.ticketType.name} x {ticket.quantity}
+                          {ticket.ticketType.name} x {count}
                         </p>
                       </div>
                       <Badge variant="secondary">Использован</Badge>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
               </div>
             )}

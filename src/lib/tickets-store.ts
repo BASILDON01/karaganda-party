@@ -96,21 +96,24 @@ export function addPurchasedTickets(params: {
   const all = readAllTickets();
   const created: StoredTicket[] = [];
 
+  const purchasedAt = new Date().toISOString();
   for (const { ticketType, quantity } of params.ticketSelections) {
     if (quantity <= 0) continue;
-    const newTicket: StoredTicket = {
-      userId: params.userId,
-      id: generateTicketId(),
-      party: params.party,
-      ticketType,
-      quantity,
-      purchasedAt: new Date().toISOString(),
-      status: "active",
-      qrCode: generateQRCode(),
-      paymentMethod: params.paymentMethod,
-    };
-    all.push(newTicket);
-    created.push(newTicket);
+    for (let i = 0; i < quantity; i++) {
+      const newTicket: StoredTicket = {
+        userId: params.userId,
+        id: generateTicketId(),
+        party: params.party,
+        ticketType,
+        quantity: 1,
+        purchasedAt,
+        status: "active",
+        qrCode: generateQRCode(),
+        paymentMethod: params.paymentMethod,
+      };
+      all.push(newTicket);
+      created.push(newTicket);
+    }
   }
 
   if (created.length > 0) {

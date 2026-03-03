@@ -25,6 +25,7 @@ import { Badge } from '@/components/ui/badge';
 import { formatPrice, formatDate, getTicketAvailability } from '@/lib/mock-data';
 import type { Party } from '@/lib/types';
 import { useAuth } from '@/lib/auth-context';
+import { GalleryLightbox } from '@/components/gallery-lightbox';
 import { useTickets } from '@/lib/tickets-context';
 import { toast } from 'sonner';
 
@@ -48,6 +49,7 @@ export default function PartyPage({ params }: { params: Promise<{ slug: string }
   const { addTickets } = useTickets();
 
   const [selectedTickets, setSelectedTickets] = useState<TicketSelection>({});
+  const [galleryIndex, setGalleryIndex] = useState<number | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<'kaspi' | 'halyk'>('kaspi');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -343,17 +345,54 @@ export default function PartyPage({ params }: { params: Promise<{ slug: string }
               <div className="space-y-6">
                 <h2 className="text-2xl font-bold tracking-wider">ГАЛЕРЕЯ</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {party.gallery.map((image, index) => (
-                    <div key={index} className="relative aspect-video rounded-xl overflow-hidden">
-                      <Image
-                        src={image}
-                        alt={`${party.name} gallery ${index + 1}`}
-                        fill
-                        className="object-cover hover:scale-105 transition-transform duration-300"
-                      />
-                    </div>
-                  ))}
+                  {party.gallery.map((item, index) => {
+                    const isVideo = typeof item === 'string' && (item.startsWith('data:video') || item.includes('/video'));
+                    return (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={() => setGalleryIndex(index)}
+                        className="relative aspect-video rounded-xl overflow-hidden bg-muted focus:outline-none focus:ring-2 focus:ring-primary"
+                      >
+                        {isVideo ? (
+                          <div className="relative w-full h-full">
+                            <video
+                              src={item}
+                              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                              muted
+                              playsInline
+                              preload="metadata"
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/30 pointer-events-none">
+                              <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center">
+                                <svg className="w-6 h-6 text-black ml-1" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M8 5v14l11-7z" />
+                                </svg>
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <Image
+                            src={item}
+                            alt={`${party.name} gallery ${index + 1}`}
+                            fill
+                            className="object-cover hover:scale-105 transition-transform duration-300"
+                            sizes="(max-width: 768px) 50vw, 33vw"
+                          />
+                        )}
+                      </button>
+                    );
+                  })}
                 </div>
+                {galleryIndex !== null && (
+                  <GalleryLightbox
+                    items={party.gallery}
+                    currentIndex={galleryIndex}
+                    onClose={() => setGalleryIndex(null)}
+                    onPrev={() => setGalleryIndex((galleryIndex - 1 + party.gallery!.length) % party.gallery!.length)}
+                    onNext={() => setGalleryIndex((galleryIndex + 1) % party.gallery!.length)}
+                  />
+                )}
               </div>
             )}
           </div>

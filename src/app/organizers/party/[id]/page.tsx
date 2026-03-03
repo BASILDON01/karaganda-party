@@ -69,9 +69,16 @@ export default function OrganizerPartyPage() {
 
   const handleGalleryAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (!file || !file.type.startsWith('image/')) return;
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error('Размер файла не более 2 МБ');
+    if (!file) return;
+    const isImage = file.type.startsWith('image/');
+    const isVideo = file.type.startsWith('video/');
+    if (!isImage && !isVideo) {
+      toast.error('Выберите фото или видео');
+      return;
+    }
+    const maxSize = isVideo ? 15 * 1024 * 1024 : 2 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast.error(isVideo ? 'Видео до 15 МБ' : 'Фото до 2 МБ');
       return;
     }
     const reader = new FileReader();
@@ -234,7 +241,7 @@ export default function OrganizerPartyPage() {
                   <input
                     ref={galleryInputRef}
                     type="file"
-                    accept="image/*"
+                    accept="image/*,video/*"
                     className="hidden"
                     onChange={handleGalleryAdd}
                   />
@@ -245,14 +252,20 @@ export default function OrganizerPartyPage() {
                     className="gap-2"
                   >
                     <Upload className="w-4 h-4" />
-                    Добавить фото
+                    Добавить фото или видео
                   </Button>
                 </div>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-                {(party.gallery ?? []).map((url, idx) => (
+                {(party.gallery ?? []).map((url, idx) => {
+                  const isVideo = typeof url === 'string' && (url.startsWith('data:video') || url.includes('video'));
+                  return (
                   <div key={idx} className="relative group aspect-square rounded-xl overflow-hidden bg-muted">
-                    <Image src={url} alt="" fill className="object-cover" />
+                    {isVideo ? (
+                      <video src={url} className="w-full h-full object-cover" muted playsInline />
+                    ) : (
+                      <Image src={url} alt="" fill className="object-cover" />
+                    )}
                     <button
                       onClick={() => handleGalleryRemove(idx)}
                       className="absolute top-2 right-2 p-1.5 rounded-full bg-red-500/90 text-white opacity-0 group-hover:opacity-100 transition-opacity"
@@ -260,7 +273,8 @@ export default function OrganizerPartyPage() {
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
-                ))}
+                  );
+                })}
                 <button
                   onClick={() => galleryInputRef.current?.click()}
                   className="aspect-square rounded-xl border-2 border-dashed border-white/20 hover:border-primary/50 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors"
