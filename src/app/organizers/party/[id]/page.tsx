@@ -301,7 +301,7 @@ export default function OrganizerPartyPage() {
                         type="number"
                         min={tt.sold ?? 0}
                         value={tt.quantity}
-                        onChange={(e) => handleTicketQuantityChange(tt.id, parseInt(e.target.value, 10) || tt.sold ?? 0)}
+                        onChange={(e) => handleTicketQuantityChange(tt.id, parseInt(e.target.value, 10) || (tt.sold ?? 0))}
                         className="w-24"
                       />
                     </div>
