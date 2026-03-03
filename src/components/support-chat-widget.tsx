@@ -76,6 +76,15 @@ export function SupportChatWidget() {
     if (listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight;
   }, [messages]);
 
+  useEffect(() => {
+    const handler = () => {
+      if (isAuthenticated) setOpen(true);
+      else toast.error('Войдите, чтобы открыть чат');
+    };
+    window.addEventListener('support-chat:open', handler);
+    return () => window.removeEventListener('support-chat:open', handler);
+  }, [isAuthenticated]);
+
   const send = async () => {
     const text = input.trim();
     if (!text || sending) return;

@@ -3,7 +3,6 @@ import Link from "next/link";
 import {
   ChevronLeft,
   HelpCircle,
-  MessageCircle,
   Mail,
   Ticket,
   CreditCard,
@@ -11,8 +10,7 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-
-const botUsername = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || "factorkz_bot";
+import { SupportChatTrigger } from "@/components/support-chat-trigger";
 
 const faq = [
   {
@@ -90,20 +88,7 @@ export default function HelpPage() {
           <div className="border-t border-white/10 pt-8">
             <h2 className="text-xl font-bold tracking-wider mb-4">Связаться с поддержкой</h2>
             <div className="grid sm:grid-cols-2 gap-4">
-              <a
-                href={`https://t.me/${botUsername}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="glow-card rounded-xl p-5 flex items-center gap-4 hover:bg-white/5 transition-colors"
-              >
-                <div className="w-12 h-12 rounded-xl bg-[#0088cc]/20 flex items-center justify-center">
-                  <MessageCircle className="w-6 h-6 text-[#0088cc]" />
-                </div>
-                <div>
-                  <p className="font-semibold text-white">Telegram</p>
-                  <p className="text-sm text-muted-foreground">@{botUsername}</p>
-                </div>
-              </a>
+              <SupportChatTrigger />
               <a
                 href="mailto:support@factorkz.kz"
                 className="glow-card rounded-xl p-5 flex items-center gap-4 hover:bg-white/5 transition-colors"
