@@ -73,6 +73,10 @@ export function getPartyBySlug(slug: string): Party | undefined {
   return readAll().find((p) => p.slug === slug);
 }
 
+export function getPartyById(partyId: string): Party | undefined {
+  return readAll().find((p) => p.id === partyId);
+}
+
 export function addPartyFromSubmission(sub: PartySubmission): Party {
   const list = readAll();
   const now = new Date().toISOString();
@@ -148,6 +152,48 @@ export function getPartiesByOrganizer(userId: string): Party[] {
   return readAll()
     .filter((p) => p.createdBy === userId)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+}
+
+export function updateOrganizerParty(
+  partyId: string,
+  userId: string,
+  updates: {
+    gallery?: string[];
+    lineup?: { id: string; name: string; role: string; image?: string }[];
+    ticketTypes?: { id: string; quantity: number }[];
+  }
+): Party | null {
+  const list = readAll();
+  const idx = list.findIndex((p) => p.id === partyId && p.createdBy === userId);
+  if (idx === -1) return null;
+  const party = list[idx];
+  const now = new Date().toISOString();
+
+  if (updates.gallery !== undefined) {
+    party.gallery = updates.gallery;
+  }
+  if (updates.lineup !== undefined) {
+    party.lineup = updates.lineup.map((a, i) => ({
+      id: a.id || `artist-${Date.now()}-${i}`,
+      name: a.name,
+      role: a.role,
+      image: a.image,
+      socialLinks: undefined,
+    }));
+  }
+  if (updates.ticketTypes !== undefined) {
+    for (const upd of updates.ticketTypes) {
+      const tt = party.ticketTypes.find((t) => t.id === upd.id);
+      if (tt && upd.quantity >= (tt.sold ?? 0)) {
+        tt.quantity = upd.quantity;
+      }
+    }
+    party.totalTickets = party.ticketTypes.reduce((s, t) => s + t.quantity, 0);
+  }
+
+  party.updatedAt = now;
+  writeAll(list);
+  return party;
 }
 
 export function incrementPartySold(
