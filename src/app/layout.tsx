@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Header } from "@/components/header";
 import { Toaster } from "@/components/ui/sonner";
+import { SupportChatWidget } from "@/components/support-chat-widget";
 import { AuthProvider } from "@/lib/auth-context";
 import { TicketsProvider } from "@/lib/tickets-context";
 
@@ -23,6 +24,7 @@ export default function RootLayout({
           <TicketsProvider>
             <Header />
             <main>{children}</main>
+            <SupportChatWidget />
             <Toaster />
           </TicketsProvider>
         </AuthProvider>

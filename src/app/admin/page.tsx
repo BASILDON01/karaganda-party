@@ -15,6 +15,8 @@ import {
   BarChart3,
   Users,
   ImageIcon,
+  MessageCircle,
+  Send,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/auth-context';
@@ -33,6 +35,8 @@ type AdminStats = {
   usersCount: number;
 };
 
+type SupportMsg = { id: string; userId: string; author: 'user' | 'support'; text: string; createdAt: string };
+
 export default function AdminPage() {
   const router = useRouter();
   const { isAuthenticated, isLoading } = useAuth();
@@ -42,6 +46,10 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [supportConversations, setSupportConversations] = useState<Array<{ userId: string; messages: SupportMsg[] }>>([]);
+  const [selectedSupportUserId, setSelectedSupportUserId] = useState<string | null>(null);
+  const [supportReply, setSupportReply] = useState('');
+  const [supportSending, setSupportSending] = useState(false);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -53,10 +61,11 @@ export default function AdminPage() {
     async function load() {
       setLoading(true);
       try {
-        const [pendingRes, partiesRes, statsRes] = await Promise.all([
+        const [pendingRes, partiesRes, statsRes, supportRes] = await Promise.all([
           fetch('/api/admin/parties/pending'),
           fetch('/api/parties'),
           fetch('/api/admin/stats'),
+          fetch('/api/support/messages'),
         ]);
         if (cancelled) return;
         if (pendingRes.status === 403 || statsRes.status === 403) {
@@ -71,9 +80,11 @@ export default function AdminPage() {
         const pendingData = await pendingRes.json();
         const partiesData = await partiesRes.json();
         const statsData = await statsRes.json();
+        const supportData = await supportRes.json();
         if (pendingData?.ok && pendingData.submissions) setSubmissions(pendingData.submissions);
         if (partiesData?.ok && partiesData.parties) setParties(partiesData.parties);
         if (statsData?.ok && statsData.stats) setStats(statsData.stats);
+        if (supportData?.ok && supportData.conversations) setSupportConversations(supportData.conversations);
       } catch {
         if (!cancelled) toast.error('Ошибка загрузки');
       } finally {
@@ -149,6 +160,34 @@ export default function AdminPage() {
       toast.error('Ошибка');
     } finally {
       setDeletingId(null);
+    }
+  }
+
+  async function sendSupportReply(userId: string) {
+    const text = supportReply.trim();
+    if (!text || supportSending) return;
+    setSupportSending(true);
+    try {
+      const res = await fetch('/api/support/messages', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text, userId }),
+      });
+      const data = await res.json();
+      if (res.ok && data?.ok && data.message) {
+        setSupportConversations((prev) =>
+          prev.map((c) =>
+            c.userId === userId ? { ...c, messages: [...c.messages, data.message] } : c
+          )
+        );
+        setSupportReply('');
+      } else {
+        toast.error('Не удалось отправить');
+      }
+    } catch {
+      toast.error('Ошибка');
+    } finally {
+      setSupportSending(false);
     }
   }
 
@@ -228,7 +267,6 @@ export default function AdminPage() {
                       <div className="flex-1 min-w-0 flex items-center gap-3">
                         {p.image && (
                           <div className="relative w-14 h-14 rounded-lg overflow-hidden shrink-0 bg-muted">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src={p.image} alt="" className="w-full h-full object-cover" />
                           </div>
                         )}
@@ -283,7 +321,6 @@ export default function AdminPage() {
                         <div className="flex flex-col sm:flex-row gap-4 flex-1 min-w-0">
                           {s.image ? (
                             <div className="w-full sm:w-40 h-36 rounded-xl overflow-hidden shrink-0 bg-muted">
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
                               <img src={s.image} alt={s.name} className="w-full h-full object-cover" />
                             </div>
                           ) : (
@@ -320,7 +357,6 @@ export default function AdminPage() {
                               {s.creator ? (
                                 <div className="flex items-center gap-2">
                                   {s.creator.avatar ? (
-                                    // eslint-disable-next-line @next/next/no-img-element
                                     <img src={s.creator.avatar} alt="" className="w-6 h-6 rounded-full object-cover" />
                                   ) : (
                                     <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center">
@@ -373,6 +409,85 @@ export default function AdminPage() {
                     </li>
                   ))}
                 </ul>
+              )}
+            </section>
+
+            {/* Поддержка — чат с пользователями */}
+            <section className="mb-10">
+              <h2 className="text-xl font-bold tracking-wider mb-4 flex items-center gap-2">
+                <MessageCircle className="w-5 h-5 text-primary" />
+                ПОДДЕРЖКА
+              </h2>
+              {supportConversations.length === 0 ? (
+                <div className="glow-card rounded-2xl p-6 text-center text-muted-foreground">
+                  Пока нет обращений в поддержку
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {supportConversations.map(({ userId, messages }) => (
+                    <div key={userId} className="glow-card rounded-2xl overflow-hidden">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSupportReply('');
+                          setSelectedSupportUserId((id) => (id === userId ? null : userId));
+                        }}
+                        className="w-full p-4 flex items-center justify-between text-left hover:bg-white/5 transition-colors"
+                      >
+                        <span className="font-medium">Telegram ID: {userId}</span>
+                        <span className="text-sm text-muted-foreground">
+                          {messages.length} сообщ.
+                        </span>
+                      </button>
+                      {selectedSupportUserId === userId && (
+                        <div className="border-t border-white/10 p-4 space-y-3">
+                          <div className="max-h-64 overflow-y-auto space-y-2">
+                            {messages.map((m) => (
+                              <div
+                                key={m.id}
+                                className={`flex ${m.author === 'support' ? 'justify-end' : 'justify-start'}`}
+                              >
+                                <div
+                                  className={`max-w-[85%] rounded-xl px-3 py-2 text-sm ${
+                                    m.author === 'support'
+                                      ? 'bg-primary text-primary-foreground'
+                                      : 'bg-muted'
+                                  }`}
+                                >
+                                  <p className="whitespace-pre-wrap break-words">{m.text}</p>
+                                  <p className="text-xs opacity-80 mt-1">
+                                    {new Date(m.createdAt).toLocaleString('ru-RU')}
+                                  </p>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              value={selectedSupportUserId === userId ? supportReply : ''}
+                              onChange={(e) => setSupportReply(e.target.value)}
+                              onKeyDown={(e) =>
+                                e.key === 'Enter' && sendSupportReply(userId)
+                              }
+                              placeholder="Ответить..."
+                              className="flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                            />
+                            <Button
+                              size="sm"
+                              onClick={() => sendSupportReply(userId)}
+                              disabled={supportSending || !supportReply.trim()}
+                              className="gap-1"
+                            >
+                              <Send className="w-4 h-4" />
+                              Отправить
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               )}
             </section>
           </>

@@ -136,3 +136,11 @@ export interface PartySubmission {
   reviewedBy?: string;
   rejectionReason?: string;
 }
+
+export interface SupportMessage {
+  id: string;
+  userId: string;
+  author: 'user' | 'support';
+  text: string;
+  createdAt: string;
+}
