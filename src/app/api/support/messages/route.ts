@@ -3,6 +3,11 @@ import { getSessionUser } from "@/lib/session";
 import { isAdmin } from "@/lib/admin";
 import { addMessage, getMessagesByUser, getAllUserIdsWithMessages } from "@/lib/support-store";
 
+const NO_CACHE_HEADERS = {
+  "Cache-Control": "no-store, no-cache, must-revalidate",
+  "Pragma": "no-cache",
+};
+
 export async function GET(req: Request) {
   const user = await getSessionUser();
   if (!user) {
@@ -11,12 +16,9 @@ export async function GET(req: Request) {
 
   const { searchParams } = new URL(req.url);
   const forUserId = searchParams.get("userId");
+  const conversationsOnly = searchParams.get("conversations") === "1";
 
-  if (isAdmin(user.id)) {
-    if (forUserId) {
-      const messages = getMessagesByUser(forUserId);
-      return NextResponse.json({ ok: true, messages, asAdmin: true });
-    }
+  if (isAdmin(user.id) && conversationsOnly) {
     const userIds = getAllUserIdsWithMessages();
     const conversations = userIds.map((uid) => ({
       userId: uid,
@@ -25,13 +27,13 @@ export async function GET(req: Request) {
     return NextResponse.json({ ok: true, conversations });
   }
 
+  if (isAdmin(user.id) && forUserId) {
+    const messages = getMessagesByUser(forUserId);
+    return NextResponse.json({ ok: true, messages, asAdmin: true });
+  }
+
   const messages = getMessagesByUser(user.id);
-  return NextResponse.json({ ok: true, messages }, {
-    headers: {
-      "Cache-Control": "no-store, no-cache, must-revalidate",
-      "Pragma": "no-cache",
-    },
-  });
+  return NextResponse.json({ ok: true, messages }, { headers: NO_CACHE_HEADERS });
 }
 
 export async function POST(req: Request) {

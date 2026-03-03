@@ -65,7 +65,7 @@ export default function AdminPage() {
           fetch('/api/admin/parties/pending'),
           fetch('/api/parties'),
           fetch('/api/admin/stats'),
-          fetch('/api/support/messages'),
+          fetch('/api/support/messages?conversations=1'),
         ]);
         if (cancelled) return;
         if (pendingRes.status === 403 || statsRes.status === 403) {
