@@ -111,7 +111,8 @@ export function SupportChatWidget() {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="fixed bottom-6 right-6 z-50 w-14 h-14 rounded-full bg-primary text-white shadow-lg shadow-primary/30 hover:shadow-primary/50 flex items-center justify-center transition-all hover:scale-105 relative"
+        className="fixed z-50 w-14 h-14 rounded-full bg-primary text-white shadow-lg shadow-primary/30 hover:shadow-primary/50 flex items-center justify-center transition-all hover:scale-105 relative"
+        style={{ bottom: '1.5rem', right: '1.5rem', left: 'auto' }}
         aria-label="Чат с поддержкой"
       >
         <MessageCircle className="w-6 h-6" />
@@ -123,8 +124,9 @@ export function SupportChatWidget() {
       </button>
 
       {open && (
-        <div className="fixed right-6 z-50 w-[400px] max-w-[calc(100vw-3rem)] rounded-2xl border border-white/10 bg-card shadow-xl overflow-hidden flex flex-col h-[75vh] min-h-[420px] max-h-[85vh]"
-          style={{ bottom: 'calc(1.5rem + 3.5rem + 12px)' }}
+        <div
+          className="fixed z-50 w-[400px] max-w-[calc(100vw-3rem)] rounded-2xl border border-white/10 bg-card shadow-xl overflow-hidden flex flex-col h-[75vh] min-h-[420px] max-h-[85vh]"
+          style={{ bottom: 'calc(1.5rem + 3.5rem + 12px)', right: '1.5rem', left: 'auto' }}
         >
           <div className="p-3 border-b border-white/10 flex items-center justify-between bg-primary/10 shrink-0">
             <span className="font-semibold">Поддержка FactorKZ</span>
