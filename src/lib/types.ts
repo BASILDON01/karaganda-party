@@ -114,3 +114,25 @@ export interface PurchasedTicket {
   qrCode: string;
   paymentMethod: 'kaspi' | 'halyk';
 }
+
+/** Заявка на создание мероприятия (на модерации) */
+export interface PartySubmission {
+  id: string;
+  name: string;
+  description: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  venue: string;
+  address: string;
+  dressCode: string;
+  ageRestriction: number;
+  ticketTypes: Array<{ name: string; price: number; quantity: number; description?: string }>;
+  image?: string;
+  createdBy: string;
+  createdAt: string;
+  status: 'pending' | 'approved' | 'rejected';
+  reviewedAt?: string;
+  reviewedBy?: string;
+  rejectionReason?: string;
+}

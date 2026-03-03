@@ -80,7 +80,7 @@ export default function CreatePartyPage() {
     ));
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.name || !formData.date || !formData.startTime || !formData.venue) {
@@ -88,20 +88,49 @@ export default function CreatePartyPage() {
       return;
     }
 
-    if (!ticketTypes.some(t => t.name && t.price && t.quantity)) {
-      toast.error('Добавьте хотя бы один тип билета');
+    const validTickets = ticketTypes.filter(t => t.name && t.price && t.quantity);
+    if (validTickets.length === 0) {
+      toast.error('Добавьте хотя бы один тип билета с названием, ценой и количеством');
       return;
     }
 
     setIsSubmitting(true);
-
-    setTimeout(() => {
-      setIsSubmitting(false);
-      toast.success('Пати создано!', {
+    try {
+      const res = await fetch('/api/parties/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.name.trim(),
+          description: formData.description.trim(),
+          date: formData.date,
+          startTime: formData.startTime,
+          endTime: formData.endTime || undefined,
+          venue: formData.venue.trim(),
+          address: formData.address.trim(),
+          dressCode: formData.dressCode.trim() || undefined,
+          ageRestriction: Number(formData.ageRestriction) || 18,
+          ticketTypes: validTickets.map(t => ({
+            name: t.name.trim(),
+            price: Number(t.price) || 0,
+            quantity: Number(t.quantity) || 0,
+            description: t.description?.trim() || undefined,
+          })),
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        toast.error(data?.message || 'Не удалось отправить заявку');
+        return;
+      }
+      toast.success('Заявка отправлена!', {
         description: 'Ваше событие будет проверено модератором',
       });
       router.push('/');
-    }, 1500);
+    } catch {
+      toast.error('Ошибка отправки');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (isLoading) {

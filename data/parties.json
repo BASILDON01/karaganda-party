@@ -1,0 +1,323 @@
+[
+  {
+    "id": "1",
+    "name": "PIZDEC PARTY",
+    "slug": "pizdec-party-march",
+    "description": "Самая безумная вечеринка весны! Готовьтесь к бессонной ночи с лучшими DJ Караганды. Три танцпола, световое шоу и безлимитный угар.",
+    "date": "2026-03-15",
+    "time": "22:00",
+    "endTime": "06:00",
+    "venue": {
+      "id": "1",
+      "name": "Club Inferno",
+      "address": "ул. Ерубаева 45",
+      "city": "Караганда",
+      "image": "https://images.unsplash.com/photo-1566737236500-c8ac43014a67?w=800&h=400&fit=crop"
+    },
+    "image": "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&h=500&fit=crop",
+    "gallery": [
+      "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?w=600&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?w=600&h=400&fit=crop",
+      "https://images.unsplash.com/photo-1429962714451-bb934ecdc4ec?w=600&h=400&fit=crop"
+    ],
+    "lineup": [
+      {
+        "id": "1",
+        "name": "DJ KAIZER",
+        "role": "Headliner",
+        "image": "https://images.unsplash.com/photo-1571266028243-d220c6a41bd8?w=200&h=200&fit=crop"
+      },
+      {
+        "id": "2",
+        "name": "MIRA",
+        "role": "DJ Set",
+        "image": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop"
+      },
+      {
+        "id": "3",
+        "name": "BASS DEMON",
+        "role": "Live Performance",
+        "image": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop"
+      }
+    ],
+    "ticketTypes": [
+      {
+        "id": "1",
+        "name": "Стандарт",
+        "description": "Вход на мероприятие",
+        "price": 5000,
+        "currency": "KZT",
+        "quantity": 300,
+        "sold": 187,
+        "maxPerOrder": 5
+      },
+      {
+        "id": "2",
+        "name": "VIP",
+        "description": "Отдельная зона + welcome drink",
+        "price": 12000,
+        "currency": "KZT",
+        "quantity": 50,
+        "sold": 32,
+        "maxPerOrder": 4,
+        "features": [
+          "VIP зона",
+          "Welcome drink",
+          "Приоритетный вход"
+        ]
+      },
+      {
+        "id": "3",
+        "name": "VIP Столик",
+        "description": "Столик на 6 человек + бутылка",
+        "price": 80000,
+        "currency": "KZT",
+        "quantity": 10,
+        "sold": 7,
+        "maxPerOrder": 1,
+        "features": [
+          "Столик на 6 человек",
+          "Бутылка на выбор",
+          "Персональный официант",
+          "Лучший вид"
+        ]
+      }
+    ],
+    "dressCode": "Casual / Street",
+    "ageRestriction": 18,
+    "organizer": {
+      "id": "1",
+      "name": "PIZDEC CREW",
+      "logo": "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=100&h=100&fit=crop",
+      "description": "Самые безумные вечеринки Караганды",
+      "socialLinks": {
+        "instagram": "https://instagram.com/pizdec_party",
+        "telegram": "https://t.me/pizdec_party"
+      },
+      "verified": true
+    },
+    "status": "upcoming",
+    "totalTickets": 360,
+    "soldTickets": 226,
+    "createdAt": "2026-02-01T10:00:00Z",
+    "updatedAt": "2026-02-28T15:30:00Z"
+  },
+  {
+    "id": "2",
+    "name": "DRAGON PARTY",
+    "slug": "dragon-party-spring",
+    "description": "Огненная вечеринка в стиле восточного дракона. Файер-шоу, лучшие треки и атмосфера Азии прямо в центре Караганды.",
+    "date": "2026-03-22",
+    "time": "21:00",
+    "endTime": "05:00",
+    "venue": {
+      "id": "2",
+      "name": "Sky Lounge",
+      "address": "пр. Бухар Жырау 55, 12 этаж",
+      "city": "Караганда",
+      "image": "https://images.unsplash.com/photo-1572116469696-31de0f17cc34?w=800&h=400&fit=crop"
+    },
+    "image": "https://images.unsplash.com/photo-1571204829887-3b8d69e4094d?w=800&h=500&fit=crop",
+    "lineup": [
+      {
+        "id": "4",
+        "name": "DRAGON MASTER",
+        "role": "Headliner",
+        "image": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&h=200&fit=crop"
+      },
+      {
+        "id": "5",
+        "name": "ASIA VIBES",
+        "role": "DJ Set",
+        "image": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&h=200&fit=crop"
+      }
+    ],
+    "ticketTypes": [
+      {
+        "id": "4",
+        "name": "Early Bird",
+        "description": "Ранняя покупка со скидкой",
+        "price": 4000,
+        "currency": "KZT",
+        "quantity": 100,
+        "sold": 100,
+        "maxPerOrder": 4
+      },
+      {
+        "id": "5",
+        "name": "Стандарт",
+        "price": 6000,
+        "currency": "KZT",
+        "quantity": 200,
+        "sold": 89,
+        "maxPerOrder": 5
+      },
+      {
+        "id": "6",
+        "name": "VIP Lounge",
+        "description": "Лаунж зона на крыше с видом на город",
+        "price": 15000,
+        "currency": "KZT",
+        "quantity": 40,
+        "sold": 28,
+        "maxPerOrder": 4,
+        "features": [
+          "Панорамный вид",
+          "Premium бар",
+          "Отдельный вход"
+        ]
+      }
+    ],
+    "dressCode": "Smart Casual / Dragon Theme",
+    "ageRestriction": 21,
+    "organizer": {
+      "id": "2",
+      "name": "Dragon Events",
+      "logo": "https://images.unsplash.com/photo-1514525253161-7a46d19cd819?w=100&h=100&fit=crop",
+      "description": "Премиум вечеринки с лучшими DJ",
+      "socialLinks": {
+        "instagram": "https://instagram.com/dragon_party_krg"
+      },
+      "verified": true
+    },
+    "status": "upcoming",
+    "totalTickets": 340,
+    "soldTickets": 217,
+    "createdAt": "2026-02-10T12:00:00Z",
+    "updatedAt": "2026-02-27T18:00:00Z"
+  },
+  {
+    "id": "3",
+    "name": "HELLO KITTY PARTY",
+    "slug": "hello-kitty-party",
+    "description": "Милая вечеринка для любителей kawaii культуры! Косплей приветствуется, конкурсы, призы и много розового.",
+    "date": "2026-03-29",
+    "time": "19:00",
+    "endTime": "02:00",
+    "venue": {
+      "id": "3",
+      "name": "Underground",
+      "address": "ул. Гоголя 78",
+      "city": "Караганда",
+      "image": "https://images.unsplash.com/photo-1598387993441-a364f854c3e1?w=800&h=400&fit=crop"
+    },
+    "image": "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=800&h=500&fit=crop",
+    "lineup": [
+      {
+        "id": "6",
+        "name": "DJ NEKO",
+        "role": "J-Pop & K-Pop",
+        "image": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop"
+      },
+      {
+        "id": "7",
+        "name": "ANIME BEATS",
+        "role": "Anime OST Remix",
+        "image": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop"
+      }
+    ],
+    "ticketTypes": [
+      {
+        "id": "7",
+        "name": "Kawaii Pass",
+        "price": 3500,
+        "currency": "KZT",
+        "quantity": 150,
+        "sold": 45,
+        "maxPerOrder": 4
+      },
+      {
+        "id": "8",
+        "name": "Cosplay VIP",
+        "description": "Для костюмированных гостей + подарок",
+        "price": 5000,
+        "currency": "KZT",
+        "quantity": 50,
+        "sold": 12,
+        "maxPerOrder": 2,
+        "features": [
+          "Подарочный набор",
+          "Участие в конкурсе",
+          "Фотозона"
+        ]
+      }
+    ],
+    "dressCode": "Kawaii / Cosplay / Pink",
+    "ageRestriction": 16,
+    "organizer": {
+      "id": "3",
+      "name": "Kawaii Events",
+      "logo": "https://images.unsplash.com/photo-1533174072545-7a4b6ad7a6c3?w=100&h=100&fit=crop",
+      "description": "Тематические аниме вечеринки",
+      "socialLinks": {
+        "telegram": "https://t.me/kawaii_krg"
+      },
+      "verified": false
+    },
+    "status": "upcoming",
+    "totalTickets": 200,
+    "soldTickets": 57,
+    "createdAt": "2026-02-15T09:00:00Z",
+    "updatedAt": "2026-02-26T11:00:00Z"
+  },
+  {
+    "id": "4",
+    "name": "TECHNO BUNKER",
+    "slug": "techno-bunker",
+    "description": "Андерграунд техно вечеринка. Минимум света, максимум баса. Только для истинных ценителей электронной музыки.",
+    "date": "2026-04-05",
+    "time": "23:00",
+    "endTime": "08:00",
+    "venue": {
+      "id": "3",
+      "name": "Underground",
+      "address": "ул. Гоголя 78",
+      "city": "Караганда",
+      "image": "https://images.unsplash.com/photo-1598387993441-a364f854c3e1?w=800&h=400&fit=crop"
+    },
+    "image": "https://images.unsplash.com/photo-1504680177321-2e6a879aac86?w=800&h=500&fit=crop",
+    "lineup": [
+      {
+        "id": "8",
+        "name": "DARK PULSE",
+        "role": "Techno",
+        "image": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=200&h=200&fit=crop"
+      },
+      {
+        "id": "9",
+        "name": "VOID",
+        "role": "Industrial",
+        "image": "https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=200&h=200&fit=crop"
+      }
+    ],
+    "ticketTypes": [
+      {
+        "id": "9",
+        "name": "Underground",
+        "price": 4500,
+        "currency": "KZT",
+        "quantity": 200,
+        "sold": 34,
+        "maxPerOrder": 4
+      }
+    ],
+    "dressCode": "Black Only",
+    "ageRestriction": 21,
+    "organizer": {
+      "id": "1",
+      "name": "PIZDEC CREW",
+      "logo": "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=100&h=100&fit=crop",
+      "description": "Самые безумные вечеринки Караганды",
+      "socialLinks": {
+        "instagram": "https://instagram.com/pizdec_party",
+        "telegram": "https://t.me/pizdec_party"
+      },
+      "verified": true
+    },
+    "status": "upcoming",
+    "totalTickets": 200,
+    "soldTickets": 34,
+    "createdAt": "2026-02-20T14:00:00Z",
+    "updatedAt": "2026-02-28T10:00:00Z"
+  }
+]

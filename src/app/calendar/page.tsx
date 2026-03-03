@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, MapPin, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { parties, formatPrice } from '@/lib/mock-data';
+import { formatPrice } from '@/lib/mock-data';
+import type { Party } from '@/lib/types';
 
 const MONTHS = [
   'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
@@ -17,6 +18,14 @@ const DAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
 
 export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date(2026, 2, 1)); // March 2026
+  const [parties, setParties] = useState<Party[]>([]);
+
+  useEffect(() => {
+    fetch('/api/parties')
+      .then((res) => res.json())
+      .then((data) => data.ok && data.parties && setParties(data.parties))
+      .catch(() => {});
+  }, []);
 
   const year = currentDate.getFullYear();
   const month = currentDate.getMonth();

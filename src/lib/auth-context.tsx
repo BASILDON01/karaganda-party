@@ -6,6 +6,7 @@ import type { User } from "./types";
 interface AuthContextType {
   user: User | null;
   isLoading: boolean;
+  isAdmin: boolean;
   login: (telegramData: TelegramAuthData) => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
@@ -25,6 +26,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -34,9 +36,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       try {
         const res = await fetch("/api/auth/me", { cache: "no-store" });
         if (!res.ok) return;
-        const data = (await res.json()) as { ok: boolean; user: User };
+        const data = (await res.json()) as { ok: boolean; user: User; isAdmin?: boolean };
         if (!cancelled && data?.ok && data.user) {
           setUser(data.user);
+          setIsAdmin(!!data.isAdmin);
         }
       } finally {
         if (!cancelled) setIsLoading(false);
@@ -77,6 +80,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (data?.ok && data.user) {
       setUser(data.user);
+      setIsAdmin(!!(data as { isAdmin?: boolean }).isAdmin);
     } else {
       throw new Error("Telegram auth failed");
     }
@@ -92,6 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         user,
         isLoading,
+        isAdmin,
         login,
         logout,
         isAuthenticated: !!user,

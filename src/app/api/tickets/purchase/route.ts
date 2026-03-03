@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { getSessionUser } from "@/lib/session";
 import { addPurchasedTickets } from "@/lib/tickets-store";
-import { getPartyBySlug } from "@/lib/mock-data";
+import { getPartyBySlug } from "@/lib/parties-store";
 
 type Body = {
   partySlug: string;

@@ -1,14 +1,15 @@
 import { Hero } from '@/components/hero';
 import { PartyCard } from '@/components/party-card';
-import { parties, organizers } from '@/lib/mock-data';
+import { organizers } from '@/lib/mock-data';
+import { getUpcomingParties } from '@/lib/parties-store';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Filter, Sparkles, TrendingUp, Clock } from 'lucide-react';
+import { ArrowRight, Filter, Sparkles, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
 export default function HomePage() {
-  const upcomingParties = parties.filter(p => p.status === 'upcoming');
+  const upcomingParties = getUpcomingParties();
   const botUsername = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || "factorkz_bot";
 
   return (

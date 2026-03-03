@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
-import { Menu, Ticket, User, Plus, LogOut, Settings, Calendar } from 'lucide-react';
+import { Menu, Ticket, User, Plus, LogOut, Settings, Calendar, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useAuth } from '@/lib/auth-context';
@@ -17,7 +17,7 @@ const navigation = [
 
 export function Header() {
   const [isOpen, setIsOpen] = useState(false);
-  const { user, isAuthenticated, logout } = useAuth();
+  const { user, isAuthenticated, isAdmin, logout } = useAuth();
   const { getActiveTickets } = useTickets();
 
   const activeTicketsCount = getActiveTickets().length;
@@ -97,6 +97,14 @@ export function Header() {
               </Link>
             )}
 
+            {isAdmin && (
+              <Link href="/admin" className="hidden md:flex">
+                <Button variant="outline" size="sm" className="gap-2">
+                  <Shield className="w-4 h-4" />
+                  Админка
+                </Button>
+              </Link>
+            )}
             <Link href="/create-party" className="hidden md:flex">
               <Button size="sm" className="gap-2">
                 <Plus className="w-4 h-4" />
@@ -191,6 +199,14 @@ export function Header() {
                       </Link>
                     )}
 
+                    {isAdmin && (
+                      <Link href="/admin" onClick={() => setIsOpen(false)}>
+                        <Button variant="outline" className="w-full justify-start gap-3 h-12">
+                          <Shield className="w-5 h-5" />
+                          Админка
+                        </Button>
+                      </Link>
+                    )}
                     <Link href="/create-party" onClick={() => setIsOpen(false)}>
                       <Button className="w-full justify-start gap-3 h-12 mt-4">
                         <Plus className="w-5 h-5" />

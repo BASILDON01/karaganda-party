@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, use } from 'react';
+import { useState, use, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -22,7 +22,8 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { getPartyBySlug, formatPrice, formatDate, getTicketAvailability } from '@/lib/mock-data';
+import { formatPrice, formatDate, getTicketAvailability } from '@/lib/mock-data';
+import type { Party } from '@/lib/types';
 import { useAuth } from '@/lib/auth-context';
 import { useTickets } from '@/lib/tickets-context';
 import { toast } from 'sonner';
@@ -34,7 +35,14 @@ interface TicketSelection {
 export default function PartyPage({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = use(params);
   const router = useRouter();
-  const party = getPartyBySlug(resolvedParams.slug);
+  const [party, setParty] = useState<Party | null | undefined>(undefined);
+
+  useEffect(() => {
+    fetch(`/api/parties/${encodeURIComponent(resolvedParams.slug)}`)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => data?.ok && data.party ? setParty(data.party) : setParty(null))
+      .catch(() => setParty(null));
+  }, [resolvedParams.slug]);
 
   const { isAuthenticated } = useAuth();
   const { addTickets } = useTickets();
@@ -44,6 +52,13 @@ export default function PartyPage({ params }: { params: Promise<{ slug: string }
   const [isProcessing, setIsProcessing] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
 
+  if (party === undefined) {
+    return (
+      <div className="min-h-screen flex items-center justify-center pt-20">
+        <div className="w-8 h-8 border-2 border-primary/30 border-t-primary rounded-full animate-spin" />
+      </div>
+    );
+  }
   if (!party) {
     return (
       <div className="min-h-screen flex items-center justify-center pt-20">
