@@ -13,6 +13,8 @@ const navigation = [
   { name: 'Все пати', href: '/' },
   { name: 'Календарь', href: '/calendar' },
   { name: 'Организаторам', href: '/organizers' },
+  { name: 'Тарифы', href: '/pricing' },
+  { name: 'Документация', href: '/docs' },
 ];
 
 export function Header() {
