@@ -8,6 +8,9 @@ import { ArrowRight, Filter, Sparkles, TrendingUp } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
+// Чтобы одобренные пати сразу появлялись на главной (данные из data/parties.json)
+export const dynamic = 'force-dynamic';
+
 export default function HomePage() {
   const upcomingParties = getUpcomingParties();
   const botUsername = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || "factorkz_bot";

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -49,6 +49,9 @@ export default function CreatePartyPage() {
     { id: '1', name: 'Стандарт', price: '', quantity: '', description: '' },
   ]);
 
+  const [coverImage, setCoverImage] = useState<string | null>(null);
+  const coverInputRef = useRef<HTMLInputElement>(null);
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -80,6 +83,27 @@ export default function CreatePartyPage() {
     ));
   };
 
+  const handleCoverClick = () => {
+    coverInputRef.current?.click();
+  };
+
+  const handleCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      toast.error('Выберите изображение (JPG, PNG)');
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Размер файла не более 2 МБ');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => setCoverImage(reader.result as string);
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -109,6 +133,7 @@ export default function CreatePartyPage() {
           address: formData.address.trim(),
           dressCode: formData.dressCode.trim() || undefined,
           ageRestriction: Number(formData.ageRestriction) || 18,
+          image: coverImage || undefined,
           ticketTypes: validTickets.map(t => ({
             name: t.name.trim(),
             price: Number(t.price) || 0,
@@ -188,11 +213,28 @@ export default function CreatePartyPage() {
 
               <div>
                 <label className="block text-sm font-medium mb-2">Обложка</label>
-                <div className="border-2 border-dashed border-white/10 rounded-xl p-8 text-center hover:border-primary/50 transition-colors cursor-pointer">
-                  <ImageIcon className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <p className="text-muted-foreground mb-2">Перетащите изображение или нажмите для выбора</p>
-                  <p className="text-xs text-muted-foreground">PNG, JPG до 5MB. Рекомендуется 1920x1080</p>
-                </div>
+                <input
+                  ref={coverInputRef}
+                  type="file"
+                  accept="image/jpeg,image/png,image/webp"
+                  className="hidden"
+                  onChange={handleCoverChange}
+                />
+                <button
+                  type="button"
+                  onClick={handleCoverClick}
+                  className="w-full border-2 border-dashed border-white/10 rounded-xl p-8 text-center hover:border-primary/50 transition-colors cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                >
+                  {coverImage ? (
+                    <img src={coverImage} alt="Превью" className="max-h-48 mx-auto rounded-lg object-cover" />
+                  ) : (
+                    <>
+                      <ImageIcon className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                      <p className="text-muted-foreground mb-2">Нажмите для выбора изображения</p>
+                      <p className="text-xs text-muted-foreground">PNG, JPG до 2 МБ. Рекомендуется 1920×1080</p>
+                    </>
+                  )}
+                </button>
               </div>
             </div>
           </div>
