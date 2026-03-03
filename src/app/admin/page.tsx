@@ -3,18 +3,45 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ChevronLeft, Check, X, Loader2, Calendar, MapPin, Ticket } from 'lucide-react';
+import {
+  ChevronLeft,
+  Check,
+  X,
+  Loader2,
+  Calendar,
+  MapPin,
+  Ticket,
+  Trash2,
+  BarChart3,
+  Users,
+  ImageIcon,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/auth-context';
 import { toast } from 'sonner';
 import type { PartySubmission } from '@/lib/types';
+import type { Party } from '@/lib/types';
+
+type SubmissionWithCreator = PartySubmission & {
+  creator: { id: string; name: string; avatar?: string; createdAt: string } | null;
+};
+
+type AdminStats = {
+  partiesCount: number;
+  pendingSubmissionsCount: number;
+  totalTicketsSold: number;
+  usersCount: number;
+};
 
 export default function AdminPage() {
   const router = useRouter();
   const { isAuthenticated, isLoading } = useAuth();
-  const [submissions, setSubmissions] = useState<PartySubmission[]>([]);
+  const [stats, setStats] = useState<AdminStats | null>(null);
+  const [submissions, setSubmissions] = useState<SubmissionWithCreator[]>([]);
+  const [parties, setParties] = useState<Party[]>([]);
   const [loading, setLoading] = useState(true);
   const [acting, setActing] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -26,23 +53,27 @@ export default function AdminPage() {
     async function load() {
       setLoading(true);
       try {
-        const res = await fetch('/api/admin/parties/pending');
-        const data = await res.json();
+        const [pendingRes, partiesRes, statsRes] = await Promise.all([
+          fetch('/api/admin/parties/pending'),
+          fetch('/api/parties'),
+          fetch('/api/admin/stats'),
+        ]);
         if (cancelled) return;
-        if (res.status === 403) {
+        if (pendingRes.status === 403 || statsRes.status === 403) {
           toast.error('Доступ запрещён');
           router.push('/');
           return;
         }
-        if (res.status === 401) {
+        if (pendingRes.status === 401) {
           router.push('/login');
           return;
         }
-        if (!data.ok) {
-          toast.error('Не удалось загрузить заявки');
-          return;
-        }
-        setSubmissions(data.submissions ?? []);
+        const pendingData = await pendingRes.json();
+        const partiesData = await partiesRes.json();
+        const statsData = await statsRes.json();
+        if (pendingData?.ok && pendingData.submissions) setSubmissions(pendingData.submissions);
+        if (partiesData?.ok && partiesData.parties) setParties(partiesData.parties);
+        if (statsData?.ok && statsData.stats) setStats(statsData.stats);
       } catch {
         if (!cancelled) toast.error('Ошибка загрузки');
       } finally {
@@ -64,6 +95,10 @@ export default function AdminPage() {
       }
       toast.success('Мероприятие одобрено и опубликовано');
       setSubmissions((prev) => prev.filter((s) => s.id !== id));
+      if (stats) setStats({ ...stats, partiesCount: stats.partiesCount + 1, pendingSubmissionsCount: stats.pendingSubmissionsCount - 1 });
+      const partiesRes = await fetch('/api/parties');
+      const partiesData = await partiesRes.json();
+      if (partiesData?.ok && partiesData.parties) setParties(partiesData.parties);
     } catch {
       toast.error('Ошибка');
     } finally {
@@ -86,10 +121,34 @@ export default function AdminPage() {
       }
       toast.success('Заявка отклонена');
       setSubmissions((prev) => prev.filter((s) => s.id !== id));
+      if (stats) setStats({ ...stats, pendingSubmissionsCount: stats.pendingSubmissionsCount - 1 });
     } catch {
       toast.error('Ошибка');
     } finally {
       setActing(null);
+    }
+  }
+
+  async function deleteParty(partyId: string) {
+    setDeletingId(partyId);
+    try {
+      const res = await fetch('/api/admin/parties/delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ partyId }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        toast.error(data.error === 'not_found' ? 'Мероприятие не найдено' : 'Ошибка');
+        return;
+      }
+      toast.success('Мероприятие удалено');
+      setParties((prev) => prev.filter((p) => p.id !== partyId));
+      if (stats) setStats({ ...stats, partiesCount: stats.partiesCount - 1 });
+    } catch {
+      toast.error('Ошибка');
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -105,7 +164,7 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen pt-24 pb-16">
-      <div className="container mx-auto px-4 max-w-3xl">
+      <div className="container mx-auto px-4 max-w-4xl">
         <div className="flex items-center gap-4 mb-8">
           <Link href="/">
             <Button variant="ghost" size="icon">
@@ -113,8 +172,8 @@ export default function AdminPage() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl md:text-4xl font-bold tracking-wider">МОДЕРАЦИЯ</h1>
-            <p className="text-muted-foreground mt-1">Заявки на публикацию мероприятий</p>
+            <h1 className="text-3xl md:text-4xl font-bold tracking-wider">АДМИН-ПАНЕЛЬ</h1>
+            <p className="text-muted-foreground mt-1">Модерация, статистика, управление мероприятиями</p>
           </div>
         </div>
 
@@ -122,76 +181,201 @@ export default function AdminPage() {
           <div className="flex justify-center py-12">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
           </div>
-        ) : submissions.length === 0 ? (
-          <div className="glow-card rounded-2xl p-8 text-center">
-            <p className="text-muted-foreground">Нет заявок на модерации</p>
-            <Link href="/create-party" className="inline-block mt-4">
-              <Button variant="outline">Создать мероприятие</Button>
-            </Link>
-          </div>
         ) : (
-          <ul className="space-y-4">
-            {submissions.map((s) => (
-              <li key={s.id} className="glow-card rounded-2xl p-6">
-                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <h2 className="text-xl font-bold truncate">{s.name}</h2>
-                    <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-sm text-muted-foreground">
-                      <span className="flex items-center gap-1">
-                        <Calendar className="w-4 h-4" />
-                        {s.date} {s.startTime}
-                        {s.endTime && ` – ${s.endTime}`}
-                      </span>
-                      <span className="flex items-center gap-1">
-                        <MapPin className="w-4 h-4" />
-                        {s.venue}
-                        {s.address && `, ${s.address}`}
-                      </span>
-                    </div>
-                    {s.description && (
-                      <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{s.description}</p>
-                    )}
-                    <div className="flex items-center gap-2 mt-2">
-                      <Ticket className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm">
-                        {s.ticketTypes.length} тип(ов) билетов · {s.ticketTypes.reduce((a, t) => a + t.quantity, 0)} мест
-                      </span>
-                    </div>
-                    <p className="text-xs text-muted-foreground mt-2">ID заявки: {s.id} · от {new Date(s.createdAt).toLocaleString('ru-RU')}</p>
+          <>
+            {/* Статистика */}
+            {stats && (
+              <section className="mb-10">
+                <h2 className="text-xl font-bold tracking-wider mb-4 flex items-center gap-2">
+                  <BarChart3 className="w-5 h-5 text-primary" />
+                  СТАТИСТИКА
+                </h2>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                  <div className="glow-card rounded-xl p-4">
+                    <p className="text-2xl font-bold text-primary">{stats.partiesCount}</p>
+                    <p className="text-sm text-muted-foreground">Опубликовано мероприятий</p>
                   </div>
-                  <div className="flex gap-2 shrink-0">
-                    <Button
-                      size="sm"
-                      onClick={() => approve(s.id)}
-                      disabled={acting !== null}
-                      className="gap-1"
-                    >
-                      {acting === s.id ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <Check className="w-4 h-4" />
-                      )}
-                      Одобрить
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => reject(s.id)}
-                      disabled={acting !== null}
-                      className="gap-1"
-                    >
-                      {acting === s.id ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <X className="w-4 h-4" />
-                      )}
-                      Отклонить
-                    </Button>
+                  <div className="glow-card rounded-xl p-4">
+                    <p className="text-2xl font-bold">{stats.pendingSubmissionsCount}</p>
+                    <p className="text-sm text-muted-foreground">На модерации</p>
+                  </div>
+                  <div className="glow-card rounded-xl p-4">
+                    <p className="text-2xl font-bold">{stats.totalTicketsSold}</p>
+                    <p className="text-sm text-muted-foreground">Билетов продано</p>
+                  </div>
+                  <div className="glow-card rounded-xl p-4 flex items-center gap-2">
+                    <Users className="w-5 h-5 text-muted-foreground" />
+                    <div>
+                      <p className="text-2xl font-bold">{stats.usersCount}</p>
+                      <p className="text-sm text-muted-foreground">Пользователей</p>
+                    </div>
                   </div>
                 </div>
-              </li>
-            ))}
-          </ul>
+              </section>
+            )}
+
+            {/* Опубликованные мероприятия — удаление */}
+            <section className="mb-10">
+              <h2 className="text-xl font-bold tracking-wider mb-4">ОПУБЛИКОВАННЫЕ МЕРОПРИЯТИЯ</h2>
+              {parties.length === 0 ? (
+                <div className="glow-card rounded-2xl p-6 text-center text-muted-foreground">
+                  Пока нет опубликованных мероприятий
+                </div>
+              ) : (
+                <ul className="space-y-3">
+                  {parties.map((p) => (
+                    <li key={p.id} className="glow-card rounded-xl p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+                      <div className="flex-1 min-w-0 flex items-center gap-3">
+                        {p.image && (
+                          <div className="relative w-14 h-14 rounded-lg overflow-hidden shrink-0 bg-muted">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={p.image} alt="" className="w-full h-full object-cover" />
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <p className="font-semibold truncate">{p.name}</p>
+                          <p className="text-sm text-muted-foreground">
+                            {p.date} · {p.venue.name}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex gap-2 shrink-0">
+                        <Link href={`/party/${p.slug}`} target="_blank" rel="noopener noreferrer">
+                          <Button variant="outline" size="sm">Открыть</Button>
+                        </Link>
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => deleteParty(p.id)}
+                          disabled={deletingId !== null}
+                          className="gap-1"
+                        >
+                          {deletingId === p.id ? (
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                          ) : (
+                            <Trash2 className="w-4 h-4" />
+                          )}
+                          Удалить
+                        </Button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+
+            {/* Заявки на модерации */}
+            <section>
+              <h2 className="text-xl font-bold tracking-wider mb-4">ЗАЯВКИ НА МОДЕРАЦИЮ</h2>
+              {submissions.length === 0 ? (
+                <div className="glow-card rounded-2xl p-8 text-center">
+                  <p className="text-muted-foreground">Нет заявок на модерации</p>
+                  <Link href="/create-party" className="inline-block mt-4">
+                    <Button variant="outline">Создать мероприятие</Button>
+                  </Link>
+                </div>
+              ) : (
+                <ul className="space-y-4">
+                  {submissions.map((s) => (
+                    <li key={s.id} className="glow-card rounded-2xl p-6">
+                      <div className="flex flex-col lg:flex-row gap-4">
+                        {/* Фото и инфо */}
+                        <div className="flex flex-col sm:flex-row gap-4 flex-1 min-w-0">
+                          {s.image ? (
+                            <div className="w-full sm:w-40 h-36 rounded-xl overflow-hidden shrink-0 bg-muted">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={s.image} alt={s.name} className="w-full h-full object-cover" />
+                            </div>
+                          ) : (
+                            <div className="w-full sm:w-40 h-36 rounded-xl bg-muted flex items-center justify-center shrink-0">
+                              <ImageIcon className="w-12 h-12 text-muted-foreground" />
+                            </div>
+                          )}
+                          <div className="flex-1 min-w-0">
+                            <h3 className="text-xl font-bold truncate">{s.name}</h3>
+                            <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 text-sm text-muted-foreground">
+                              <span className="flex items-center gap-1">
+                                <Calendar className="w-4 h-4" />
+                                {s.date} {s.startTime}
+                                {s.endTime && ` – ${s.endTime}`}
+                              </span>
+                              <span className="flex items-center gap-1">
+                                <MapPin className="w-4 h-4" />
+                                {s.venue}
+                                {s.address && `, ${s.address}`}
+                              </span>
+                            </div>
+                            {s.description && (
+                              <p className="mt-2 text-sm text-muted-foreground line-clamp-2">{s.description}</p>
+                            )}
+                            <div className="flex items-center gap-2 mt-2">
+                              <Ticket className="w-4 h-4 text-muted-foreground" />
+                              <span className="text-sm">
+                                {s.ticketTypes.length} тип(ов) билетов · {s.ticketTypes.reduce((a, t) => a + t.quantity, 0)} мест
+                              </span>
+                            </div>
+                            {/* Кто подал заявку */}
+                            <div className="mt-3 pt-3 border-t border-white/10">
+                              <p className="text-xs text-muted-foreground mb-1">Подал заявку:</p>
+                              {s.creator ? (
+                                <div className="flex items-center gap-2">
+                                  {s.creator.avatar ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img src={s.creator.avatar} alt="" className="w-6 h-6 rounded-full object-cover" />
+                                  ) : (
+                                    <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center">
+                                      <Users className="w-3 h-3 text-primary" />
+                                    </div>
+                                  )}
+                                  <span className="font-medium">{s.creator.name}</span>
+                                  <span className="text-xs text-muted-foreground">Telegram ID: {s.creator.id}</span>
+                                  <span className="text-xs text-muted-foreground">
+                                    в системе с {new Date(s.creator.createdAt).toLocaleDateString('ru-RU')}
+                                  </span>
+                                </div>
+                              ) : (
+                                <p className="text-sm text-muted-foreground">ID: {s.createdBy} (профиль не найден)</p>
+                              )}
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-2">ID заявки: {s.id}</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2 shrink-0 lg:flex-col">
+                          <Button
+                            size="sm"
+                            onClick={() => approve(s.id)}
+                            disabled={acting !== null}
+                            className="gap-1"
+                          >
+                            {acting === s.id ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <Check className="w-4 h-4" />
+                            )}
+                            Одобрить
+                          </Button>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => reject(s.id)}
+                            disabled={acting !== null}
+                            className="gap-1"
+                          >
+                            {acting === s.id ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <X className="w-4 h-4" />
+                            )}
+                            Отклонить
+                          </Button>
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          </>
         )}
       </div>
     </div>

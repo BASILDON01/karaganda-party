@@ -53,3 +53,7 @@ export function getUserById(telegramId: string): StoredUser | null {
   const data = readAll();
   return data[telegramId] ?? null;
 }
+
+export function getUsersCount(): number {
+  return Object.keys(readAll()).length;
+}

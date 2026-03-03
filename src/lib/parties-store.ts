@@ -121,3 +121,12 @@ export function addPartyFromSubmission(sub: PartySubmission): Party {
   writeAll(list);
   return party;
 }
+
+export function deletePartyById(partyId: string): boolean {
+  const list = readAll();
+  const idx = list.findIndex((p) => p.id === partyId);
+  if (idx === -1) return false;
+  list.splice(idx, 1);
+  writeAll(list);
+  return true;
+}

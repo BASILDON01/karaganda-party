@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/session";
 import { isAdmin } from "@/lib/admin";
 import { getPendingSubmissions } from "@/lib/party-submissions-store";
+import { getUserById } from "@/lib/users-store";
 
 export async function GET() {
   const user = await getSessionUser();
@@ -13,5 +14,14 @@ export async function GET() {
   }
 
   const list = getPendingSubmissions();
-  return NextResponse.json({ ok: true, submissions: list });
+  const submissionsWithCreator = list.map((s) => {
+    const creator = getUserById(s.createdBy);
+    return {
+      ...s,
+      creator: creator
+        ? { id: creator.id, name: creator.name, avatar: creator.avatar, createdAt: creator.createdAt }
+        : null,
+    };
+  });
+  return NextResponse.json({ ok: true, submissions: submissionsWithCreator });
 }
