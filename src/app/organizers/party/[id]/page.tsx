@@ -42,6 +42,8 @@ export default function OrganizerPartyPage() {
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<'gallery' | 'lineup' | 'tickets' | 'purchasers'>('gallery');
   const galleryInputRef = useRef<HTMLInputElement>(null);
+  const lineupImageRef = useRef<HTMLInputElement>(null);
+  const lineupImageIdxRef = useRef<number | null>(null);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -103,6 +105,27 @@ export default function OrganizerPartyPage() {
   const handleLineupRemove = (idx: number) => {
     const lineup = party?.lineup?.filter((_, i) => i !== idx) ?? [];
     setParty((p) => (p ? { ...p, lineup } : null));
+  };
+
+  const handleLineupImageClick = (idx: number) => {
+    lineupImageIdxRef.current = idx;
+    lineupImageRef.current?.click();
+  };
+
+  const handleLineupImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    const idx = lineupImageIdxRef.current;
+    if (!file || !file.type.startsWith('image/') || idx == null) return;
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Размер файла не более 2 МБ');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      handleLineupUpdate(idx, 'image', reader.result as string);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
   };
 
   const handleTicketQuantityChange = (ttId: string, val: number) => {
@@ -257,9 +280,27 @@ export default function OrganizerPartyPage() {
                   Добавить
                 </Button>
               </div>
+              <input
+                ref={lineupImageRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleLineupImageChange}
+              />
               <div className="space-y-4">
                 {(party.lineup ?? []).map((artist, idx) => (
-                  <div key={artist.id} className="flex gap-3 items-center p-4 rounded-xl bg-white/5">
+                  <div key={artist.id} className="flex gap-4 items-center p-4 rounded-xl bg-white/5 border border-white/5">
+                    <button
+                      type="button"
+                      onClick={() => handleLineupImageClick(idx)}
+                      className="relative w-16 h-16 rounded-xl overflow-hidden bg-muted shrink-0 border-2 border-dashed border-white/20 hover:border-primary/50 flex items-center justify-center group"
+                    >
+                      {artist.image ? (
+                        <Image src={artist.image} alt="" fill className="object-cover" />
+                      ) : (
+                        <ImagePlus className="w-6 h-6 text-muted-foreground group-hover:text-primary" />
+                      )}
+                    </button>
                     <Input
                       placeholder="Имя"
                       value={artist.name}

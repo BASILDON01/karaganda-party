@@ -1,21 +1,9 @@
-import Link from "next/link";
-
-import { ChevronLeft, FileText } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
+import { FileText } from "lucide-react";
 
 export default function TermsPage() {
   return (
     <div className="min-h-screen pt-24 pb-16">
       <div className="container mx-auto px-4 max-w-2xl">
-        <Link
-          href="/"
-          className="inline-flex items-center gap-2 text-muted-foreground hover:text-white transition-colors mb-8"
-        >
-          <ChevronLeft className="w-4 h-4" />
-          На главную
-        </Link>
-
         <div className="glow-card rounded-2xl p-8 mb-8">
           <div className="flex items-center gap-3 mb-8">
             <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
@@ -78,18 +66,6 @@ export default function TermsPage() {
               Дата последнего обновления: март 2026. При возникновении вопросов обращайтесь в поддержку.
             </p>
           </div>
-        </div>
-
-        <div className="flex gap-4">
-          <Link href="/">
-            <Button variant="outline" className="gap-2">
-              <ChevronLeft className="w-4 h-4" />
-              На главную
-            </Button>
-          </Link>
-          <Link href="/privacy">
-            <Button variant="ghost">Политика конфиденциальности</Button>
-          </Link>
         </div>
       </div>
     </div>
