@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { MessageCircle, X, Send, User, Headphones } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/auth-context';
@@ -22,30 +22,48 @@ export function SupportChatWidget() {
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
   const listRef = useRef<HTMLDivElement>(null);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const fetchMessages = () => {
-    if (!isAuthenticated) return;
-    return fetch('/api/support/messages', { credentials: 'include', cache: 'no-store' })
-      .then((res) => (res.ok ? res.json() : null))
+  const fetchMessages = useCallback(() => {
+    if (!isAuthenticated) return Promise.resolve();
+    return fetch('/api/support/messages', {
+      credentials: 'include',
+      cache: 'no-store',
+      headers: { 'Cache-Control': 'no-cache', 'Pragma': 'no-cache' },
+    })
+      .then((res) => {
+        if (!res.ok) return null;
+        return res.json();
+      })
       .then((data) => {
-        if (data?.ok && Array.isArray(data.messages)) setMessages(data.messages);
+        if (data?.ok && Array.isArray(data.messages)) {
+          setMessages(data.messages);
+        }
       })
       .catch(() => {});
-  };
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    fetchMessages().catch(() => toast.error('Не удалось загрузить сообщения'));
+  }, [isAuthenticated, fetchMessages]);
 
   useEffect(() => {
     if (!open || !isAuthenticated) return;
     setLoading(true);
     fetchMessages()
-      ?.catch(() => toast.error('Не удалось загрузить сообщения'))
+      .catch(() => toast.error('Не удалось загрузить сообщения'))
       .finally(() => setLoading(false));
-  }, [open, isAuthenticated]);
+  }, [open, isAuthenticated, fetchMessages]);
 
   useEffect(() => {
     if (!open || !isAuthenticated) return;
-    const interval = setInterval(() => fetchMessages(), 4000);
-    return () => clearInterval(interval);
-  }, [open, isAuthenticated]);
+    pollRef.current = setInterval(() => fetchMessages(), 2000);
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+      pollRef.current = null;
+    };
+  }, [open, isAuthenticated, fetchMessages]);
 
   useEffect(() => {
     if (listRef.current) listRef.current.scrollTop = listRef.current.scrollHeight;

@@ -26,7 +26,12 @@ export async function GET(req: Request) {
   }
 
   const messages = getMessagesByUser(user.id);
-  return NextResponse.json({ ok: true, messages });
+  return NextResponse.json({ ok: true, messages }, {
+    headers: {
+      "Cache-Control": "no-store, no-cache, must-revalidate",
+      "Pragma": "no-cache",
+    },
+  });
 }
 
 export async function POST(req: Request) {
