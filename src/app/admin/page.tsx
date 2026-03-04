@@ -4,7 +4,6 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
-  ChevronLeft,
   Check,
   X,
   Loader2,
@@ -237,18 +236,6 @@ export default function AdminPage() {
   return (
     <div className="min-h-screen pt-24 pb-16">
       <div className="container mx-auto px-4 max-w-4xl">
-        <div className="flex items-center gap-4 mb-8">
-          <Link href="/">
-            <Button variant="ghost" size="icon">
-              <ChevronLeft className="w-5 h-5" />
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-3xl md:text-4xl font-bold tracking-wider">АДМИН-ПАНЕЛЬ</h1>
-            <p className="text-muted-foreground mt-1">Модерация, статистика, управление мероприятиями</p>
-          </div>
-        </div>
-
         {loading ? (
           <div className="flex justify-center py-12">
             <Loader2 className="w-8 h-8 animate-spin text-primary" />
