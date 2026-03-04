@@ -76,9 +76,9 @@ export default function OrganizerPartyPage() {
       toast.error('Выберите фото или видео');
       return;
     }
-    const maxSize = isVideo ? 15 * 1024 * 1024 : 2 * 1024 * 1024;
+    const maxSize = isVideo ? 5 * 1024 * 1024 : 2 * 1024 * 1024;
     if (file.size > maxSize) {
-      toast.error(isVideo ? 'Видео до 15 МБ' : 'Фото до 2 МБ');
+      toast.error(isVideo ? 'Видео до 5 МБ для надёжной загрузки' : 'Фото до 2 МБ');
       return;
     }
     const reader = new FileReader();
