@@ -1,0 +1,187 @@
+'use client';
+
+import { useCallback, useMemo } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
+import { PartyCard } from '@/components/party-card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { ArrowRight, Filter, TrendingUp } from 'lucide-react';
+import type { Party } from '@/lib/types';
+
+function toDateStr(d: Date): string {
+  return d.toISOString().slice(0, 10);
+}
+
+function isWeekend(dateStr: string): boolean {
+  const d = new Date(dateStr + 'T12:00:00');
+  const day = d.getDay();
+  return day === 0 || day === 6;
+}
+
+interface PartyListWithFiltersProps {
+  parties: Party[];
+}
+
+export function PartyListWithFilters({ parties }: PartyListWithFiltersProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const q = (searchParams.get('q') ?? '').trim().toLowerCase();
+  const tag = searchParams.get('tag') ?? '';
+  const date = searchParams.get('date') ?? '';
+  const age = searchParams.get('age') ?? '';
+
+  const updateParams = useCallback(
+    (updates: { q?: string; tag?: string; date?: string; age?: string }) => {
+      const next = new URLSearchParams(searchParams.toString());
+      if (updates.q !== undefined) (updates.q ? next.set('q', updates.q) : next.delete('q'));
+      if (updates.tag !== undefined) (updates.tag ? next.set('tag', updates.tag) : next.delete('tag'));
+      if (updates.date !== undefined) (updates.date ? next.set('date', updates.date) : next.delete('date'));
+      if (updates.age !== undefined) (updates.age ? next.set('age', updates.age) : next.delete('age'));
+      router.replace('?' + next.toString(), { scroll: false });
+    },
+    [router, searchParams]
+  );
+
+  const filteredParties = useMemo(() => {
+    let list = parties;
+
+    if (q) {
+      const query = q;
+      list = list.filter((p) => {
+        const name = (p.name ?? '').toLowerCase();
+        const desc = (p.description ?? '').toLowerCase();
+        const org = (p.organizer?.name ?? '').toLowerCase();
+        const tags = (p.hashtags ?? []).join(' ').toLowerCase();
+        return name.includes(query) || desc.includes(query) || org.includes(query) || tags.includes(query);
+      });
+    }
+
+    if (tag) {
+      const t = tag.toLowerCase();
+      list = list.filter((p) => (p.hashtags ?? []).some((h) => h.toLowerCase() === t));
+    }
+
+    if (date === 'today') {
+      const today = toDateStr(new Date());
+      list = list.filter((p) => p.date === today);
+    } else if (date === 'weekend') {
+      list = list.filter((p) => isWeekend(p.date));
+    }
+
+    if (age === '18' || age === '21') {
+      const minAge = parseInt(age, 10);
+      list = list.filter((p) => (p.ageRestriction ?? 0) >= minAge);
+    }
+
+    return list;
+  }, [parties, q, tag, date, age]);
+
+  const allHashtags = useMemo(() => {
+    const set = new Set<string>();
+    parties.forEach((p) => (p.hashtags ?? []).forEach((t) => set.add(t.trim().toLowerCase())));
+    return Array.from(set).filter(Boolean).sort();
+  }, [parties]);
+
+  const hasActiveFilters = !!q || !!tag || !!date || !!age;
+
+  return (
+    <>
+      <section className="sticky top-16 md:top-20 z-40 bg-background/80 backdrop-blur-xl border-b border-white/5 py-4">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide pb-2">
+            <Button variant="outline" size="sm" className="shrink-0 gap-2">
+              <Filter className="w-4 h-4" />
+              Фильтры
+            </Button>
+            <Badge
+              variant={!hasActiveFilters ? 'secondary' : 'outline'}
+              className={`cursor-pointer transition-colors px-4 py-2 border-white/20 ${!hasActiveFilters ? 'bg-primary/20 text-primary' : 'hover:bg-primary hover:text-white'}`}
+              onClick={() => updateParams({ q: '', tag: '', date: '', age: '' })}
+            >
+              Все
+            </Badge>
+            <Badge
+              variant="outline"
+              className={`cursor-pointer transition-colors px-4 py-2 border-white/20 ${date === 'today' ? 'bg-primary text-primary-foreground border-primary' : 'hover:bg-primary hover:text-white'}`}
+              onClick={() => updateParams({ date: date === 'today' ? '' : 'today' })}
+            >
+              Сегодня
+            </Badge>
+            <Badge
+              variant="outline"
+              className={`cursor-pointer transition-colors px-4 py-2 border-white/20 ${date === 'weekend' ? 'bg-primary text-primary-foreground border-primary' : 'hover:bg-primary hover:text-white'}`}
+              onClick={() => updateParams({ date: date === 'weekend' ? '' : 'weekend' })}
+            >
+              Эти выходные
+            </Badge>
+            {allHashtags.map((t) => (
+              <Badge
+                key={t}
+                variant="outline"
+                className={`cursor-pointer transition-colors px-4 py-2 border-white/20 ${tag === t ? 'bg-primary text-primary-foreground border-primary' : 'hover:bg-primary hover:text-white'}`}
+                onClick={() => updateParams({ tag: tag === t ? '' : t })}
+              >
+                #{t}
+              </Badge>
+            ))}
+            <Badge
+              variant="outline"
+              className={`cursor-pointer transition-colors px-4 py-2 border-white/20 ${age === '18' ? 'bg-primary text-primary-foreground border-primary' : 'hover:bg-primary hover:text-white'}`}
+              onClick={() => updateParams({ age: age === '18' ? '' : '18' })}
+            >
+              18+
+            </Badge>
+            <Badge
+              variant="outline"
+              className={`cursor-pointer transition-colors px-4 py-2 border-white/20 ${age === '21' ? 'bg-primary text-primary-foreground border-primary' : 'hover:bg-primary hover:text-white'}`}
+              onClick={() => updateParams({ age: age === '21' ? '' : '21' })}
+            >
+              21+
+            </Badge>
+          </div>
+        </div>
+      </section>
+
+      <section className="py-16 md:py-24">
+        <div className="container mx-auto px-4">
+          <div className="flex items-center justify-between mb-10">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+                <TrendingUp className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-3xl md:text-4xl font-bold tracking-wider">ГОРЯЧИЕ ПАТИ</h2>
+                <p className="text-muted-foreground text-sm mt-1">Самые популярные события</p>
+              </div>
+            </div>
+            <Link href="/all" className="hidden md:flex">
+              <Button variant="ghost" className="gap-2">
+                Все события
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </Link>
+          </div>
+          <div className="party-grid">
+            {filteredParties.map((party) => (
+              <PartyCard key={party.id} party={party} />
+            ))}
+          </div>
+          {filteredParties.length === 0 && (
+            <p className="text-center text-muted-foreground py-12">
+              По вашему запросу ничего не найдено. Попробуйте другие фильтры или поиск.
+            </p>
+          )}
+          <div className="md:hidden mt-8 text-center">
+            <Link href="/all">
+              <Button variant="outline" className="gap-2">
+                Все события
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </section>
+    </>
+  );
+}

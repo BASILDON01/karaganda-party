@@ -30,7 +30,7 @@ export async function PATCH(
   }
 
   const { id } = await params;
-  let body: { gallery?: string[]; lineup?: { id?: string; name: string; role: string; image?: string }[]; ticketTypes?: { id: string; quantity: number }[] } = {};
+  let body: { gallery?: string[]; lineup?: { id?: string; name: string; role: string; image?: string }[]; ticketTypes?: { id: string; quantity: number }[]; hashtags?: string[] } = {};
   try {
     body = await req.json();
   } catch {
@@ -49,6 +49,7 @@ export async function PATCH(
     gallery: body.gallery,
     lineup,
     ticketTypes: body.ticketTypes,
+    hashtags: body.hashtags,
   });
 
   if (!party) {

@@ -15,6 +15,7 @@ import {
   Plus,
   Trash2,
   Save,
+  Hash,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,8 +41,9 @@ export default function OrganizerPartyPage() {
   const [purchasers, setPurchasers] = useState<Purchaser[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<'gallery' | 'lineup' | 'tickets' | 'purchasers'>('gallery');
+  const [activeTab, setActiveTab] = useState<'gallery' | 'hashtags' | 'lineup' | 'tickets' | 'purchasers'>('gallery');
   const [galleryUrl, setGalleryUrl] = useState('');
+  const [hashtagInput, setHashtagInput] = useState('');
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -120,6 +122,7 @@ export default function OrganizerPartyPage() {
           gallery: party.gallery ?? [],
           lineup: party.lineup ?? [],
           ticketTypes: party.ticketTypes?.map((tt) => ({ id: tt.id, quantity: tt.quantity })) ?? [],
+          hashtags: party.hashtags ?? [],
         }),
       });
       const data = await res.json();
@@ -154,6 +157,7 @@ export default function OrganizerPartyPage() {
 
   const tabs = [
     { id: 'gallery' as const, label: 'Фото', icon: ImagePlus },
+    { id: 'hashtags' as const, label: 'Хештеги', icon: Hash },
     { id: 'lineup' as const, label: 'Лайнап', icon: Music },
     { id: 'tickets' as const, label: 'Билеты', icon: Ticket },
     { id: 'purchasers' as const, label: 'Покупатели', icon: Users },
@@ -242,6 +246,72 @@ export default function OrganizerPartyPage() {
                   </div>
                   );
                 })}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'hashtags' && (
+            <div>
+              <h2 className="text-lg font-semibold mb-2">Хештеги для поиска</h2>
+              <p className="text-sm text-muted-foreground mb-4">
+                Добавьте слова или теги (без #). По ним пользователи смогут найти ваше пати в поиске и фильтрах.
+              </p>
+              <div className="flex flex-wrap gap-2 mb-4">
+                <Input
+                  placeholder="techno, house, караганда..."
+                  value={hashtagInput}
+                  onChange={(e) => setHashtagInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ',') {
+                      e.preventDefault();
+                      const tag = (e.key === ',' ? hashtagInput.replace(/,/g, '') : hashtagInput).trim().toLowerCase().replace(/^#/, '');
+                      if (tag) {
+                        const tags = [...(party.hashtags ?? []), tag].filter((t, i, a) => a.indexOf(t) === i);
+                        setParty((p) => (p ? { ...p, hashtags: tags } : null));
+                        setHashtagInput('');
+                      }
+                    }
+                  }}
+                  className="max-w-xs"
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    const tag = hashtagInput.trim().toLowerCase().replace(/^#/, '');
+                    if (!tag) return;
+                    const tags = [...(party.hashtags ?? []), tag].filter((t, i, a) => a.indexOf(t) === i);
+                    setParty((p) => (p ? { ...p, hashtags: tags } : null));
+                    setHashtagInput('');
+                  }}
+                  className="gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Добавить
+                </Button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {(party.hashtags ?? []).map((tag, idx) => (
+                  <span
+                    key={idx}
+                    className="inline-flex items-center gap-1 px-3 py-1.5 rounded-full bg-primary/20 text-primary text-sm"
+                  >
+                    #{tag}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const tags = (party.hashtags ?? []).filter((_, i) => i !== idx);
+                        setParty((p) => (p ? { ...p, hashtags: tags } : null));
+                      }}
+                      className="hover:bg-primary/30 rounded-full p-0.5"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </span>
+                ))}
+                {(!party.hashtags || party.hashtags.length === 0) && (
+                  <p className="text-muted-foreground text-sm">Пока нет хештегов</p>
+                )}
               </div>
             </div>
           )}

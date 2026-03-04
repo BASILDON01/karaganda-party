@@ -109,11 +109,10 @@ export default function LoginPage() {
     };
   }, [botUsername, login, router]);
 
-  // Open Telegram bot
   const openTelegramBot = () => {
     if (!botUsername) {
       toast.error("Не задан username бота", {
-        description: 'Укажите NEXT_PUBLIC_TELEGRAM_BOT_USERNAME в .env.local',
+        description: "Укажите NEXT_PUBLIC_TELEGRAM_BOT_USERNAME в .env.local",
       });
       return;
     }

@@ -21,6 +21,8 @@ export interface Party {
   updatedAt: string;
   /** userId организатора (создателя) — для кабинета организатора */
   createdBy?: string;
+  /** Хештеги для поиска (например: techno, house, караганда) */
+  hashtags?: string[];
 }
 
 export interface Venue {

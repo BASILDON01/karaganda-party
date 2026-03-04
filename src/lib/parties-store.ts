@@ -133,6 +133,7 @@ export function addPartyFromSubmission(sub: PartySubmission): Party {
     createdAt: now,
     updatedAt: now,
     createdBy: sub.createdBy,
+    hashtags: [],
   };
   list.push(party);
   writeAll(list);
@@ -161,6 +162,7 @@ export function updateOrganizerParty(
     gallery?: string[];
     lineup?: { id: string; name: string; role: string; image?: string }[];
     ticketTypes?: { id: string; quantity: number }[];
+    hashtags?: string[];
   }
 ): Party | null {
   const list = readAll();
@@ -189,6 +191,9 @@ export function updateOrganizerParty(
       }
     }
     party.totalTickets = party.ticketTypes.reduce((s, t) => s + t.quantity, 0);
+  }
+  if (updates.hashtags !== undefined) {
+    party.hashtags = updates.hashtags.filter((t) => t.trim().length > 0).map((t) => t.trim().toLowerCase().replace(/^#/, ""));
   }
 
   party.updatedAt = now;

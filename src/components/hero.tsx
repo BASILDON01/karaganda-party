@@ -1,10 +1,31 @@
 'use client';
 
-import { Search, MapPin, Calendar } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { Search, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 export function Hero() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [query, setQuery] = useState('');
+
+  useEffect(() => {
+    const q = searchParams.get('q');
+    setQuery(q ?? '');
+  }, [searchParams]);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = query.trim();
+    if (q) {
+      router.push('/?q=' + encodeURIComponent(q));
+    } else {
+      router.push('/');
+    }
+  };
+
   return (
     <section className="relative min-h-[70vh] flex items-center justify-center overflow-hidden">
       {/* Background */}
@@ -46,18 +67,21 @@ export function Hero() {
 
         {/* Search */}
         <div className="max-w-2xl mx-auto">
-          <div className="flex flex-col sm:flex-row gap-3 p-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl">
+          <form onSubmit={handleSearch} className="flex flex-col sm:flex-row gap-3 p-3 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-xl">
             <div className="relative flex-1">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
               <Input
-                placeholder="Название пати или организатор..."
+                type="search"
+                placeholder="Название пати, хештег или организатор..."
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
                 className="pl-12 h-12 bg-transparent border-0 focus-visible:ring-0 text-white placeholder:text-white/40"
               />
             </div>
-            <Button size="lg" className="h-12 px-8">
+            <Button type="submit" size="lg" className="h-12 px-8">
               Найти
             </Button>
-          </div>
+          </form>
         </div>
 
         {/* Stats */}

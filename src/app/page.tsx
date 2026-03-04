@@ -1,12 +1,12 @@
 import { Hero } from '@/components/hero';
-import { PartyCard } from '@/components/party-card';
+import { PartyListWithFilters } from '@/components/party-list-with-filters';
 import { organizers } from '@/lib/mock-data';
 import { getUpcomingParties } from '@/lib/parties-store';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Filter, Sparkles, TrendingUp } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { Suspense } from 'react';
 
 // Чтобы одобренные пати сразу появлялись на главной (данные из data/parties.json)
 export const dynamic = 'force-dynamic';
@@ -19,79 +19,19 @@ export default function HomePage() {
     <div className="min-h-screen">
       <Hero />
 
-      {/* Filters */}
-      <section className="sticky top-16 md:top-20 z-40 bg-background/80 backdrop-blur-xl border-b border-white/5 py-4">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide pb-2">
-            <Button variant="outline" size="sm" className="shrink-0 gap-2">
-              <Filter className="w-4 h-4" />
-              Фильтры
-            </Button>
-            <Badge variant="secondary" className="cursor-pointer hover:bg-primary hover:text-white transition-colors px-4 py-2">
-              Все
-            </Badge>
-            <Badge variant="outline" className="cursor-pointer hover:bg-primary hover:text-white transition-colors px-4 py-2 border-white/20">
-              Сегодня
-            </Badge>
-            <Badge variant="outline" className="cursor-pointer hover:bg-primary hover:text-white transition-colors px-4 py-2 border-white/20">
-              Эти выходные
-            </Badge>
-            <Badge variant="outline" className="cursor-pointer hover:bg-primary hover:text-white transition-colors px-4 py-2 border-white/20">
-              Techno
-            </Badge>
-            <Badge variant="outline" className="cursor-pointer hover:bg-primary hover:text-white transition-colors px-4 py-2 border-white/20">
-              House
-            </Badge>
-            <Badge variant="outline" className="cursor-pointer hover:bg-primary hover:text-white transition-colors px-4 py-2 border-white/20">
-              Hip-Hop
-            </Badge>
-            <Badge variant="outline" className="cursor-pointer hover:bg-primary hover:text-white transition-colors px-4 py-2 border-white/20">
-              18+
-            </Badge>
-            <Badge variant="outline" className="cursor-pointer hover:bg-primary hover:text-white transition-colors px-4 py-2 border-white/20">
-              21+
-            </Badge>
-          </div>
-        </div>
-      </section>
-
-      {/* Hot parties */}
-      <section className="py-16 md:py-24">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between mb-10">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
-                <TrendingUp className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <h2 className="text-3xl md:text-4xl font-bold tracking-wider">ГОРЯЧИЕ ПАТИ</h2>
-                <p className="text-muted-foreground text-sm mt-1">Самые популярные события</p>
-              </div>
+      <Suspense fallback={
+        <section className="py-16 md:py-24">
+          <div className="container mx-auto px-4">
+            <div className="party-grid">
+              {upcomingParties.map((p) => (
+                <div key={p.id} className="glow-card rounded-2xl h-80 animate-pulse bg-white/5" />
+              ))}
             </div>
-            <Link href="/all" className="hidden md:flex">
-              <Button variant="ghost" className="gap-2">
-                Все события
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            </Link>
           </div>
-
-          <div className="party-grid">
-            {upcomingParties.map((party) => (
-              <PartyCard key={party.id} party={party} />
-            ))}
-          </div>
-
-          <div className="md:hidden mt-8 text-center">
-            <Link href="/all">
-              <Button variant="outline" className="gap-2">
-                Все события
-                <ArrowRight className="w-4 h-4" />
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
+        </section>
+      }>
+        <PartyListWithFilters parties={upcomingParties} />
+      </Suspense>
 
       {/* Organizers */}
       <section className="py-16 md:py-24 bg-gradient-to-b from-transparent via-primary/5 to-transparent">
