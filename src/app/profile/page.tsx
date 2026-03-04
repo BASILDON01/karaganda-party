@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { User, Ticket, Settings, LogOut, ChevronRight, Send, Shield } from 'lucide-react';
+import { User, Ticket, LogOut, ChevronRight, Send, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/lib/auth-context';
@@ -100,19 +100,6 @@ export default function ProfilePage() {
               <div className="flex-1">
                 <p className="font-medium">Мои билеты</p>
                 <p className="text-sm text-muted-foreground">Посмотреть купленные билеты</p>
-              </div>
-              <ChevronRight className="w-5 h-5 text-muted-foreground" />
-            </div>
-          </Link>
-
-          <Link href="/create-party">
-            <div className="glow-card rounded-xl p-4 flex items-center gap-4 hover:bg-white/5 transition-colors">
-              <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
-                <Settings className="w-5 h-5 text-primary" />
-              </div>
-              <div className="flex-1">
-                <p className="font-medium">Стать организатором</p>
-                <p className="text-sm text-muted-foreground">Создавайте свои мероприятия</p>
               </div>
               <ChevronRight className="w-5 h-5 text-muted-foreground" />
             </div>
