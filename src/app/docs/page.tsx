@@ -1,5 +1,4 @@
 import {
-  FileText,
   Plus,
   Ticket,
   Image as ImageIcon,
@@ -76,18 +75,6 @@ export default function DocsPage() {
   return (
     <div className="min-h-screen pt-24 pb-16">
       <div className="container mx-auto px-4 max-w-3xl">
-        <div className="flex items-center gap-3 mb-10">
-          <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
-            <FileText className="w-6 h-6 text-primary" />
-          </div>
-          <div>
-            <h1 className="text-3xl md:text-4xl font-bold tracking-wider">Документация</h1>
-            <p className="text-muted-foreground text-sm mt-1">
-              Руководство для организаторов FactorKZ
-            </p>
-          </div>
-        </div>
-
         <div className="space-y-10">
           {sections.map((section) => {
             const Icon = section.icon;
