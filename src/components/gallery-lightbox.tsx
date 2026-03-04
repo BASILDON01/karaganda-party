@@ -13,6 +13,24 @@ function isExternalUrl(url: string): boolean {
   return url.startsWith('http://') || url.startsWith('https://');
 }
 
+function getYouTubeVideoId(url: string): string | null {
+  if (!url || typeof url !== 'string') return null;
+  const trimmed = url.trim();
+  const match =
+    trimmed.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/) ||
+    trimmed.match(/youtube\.com\/watch\?.+&v=([a-zA-Z0-9_-]{11})/);
+  return match ? match[1] : null;
+}
+
+function isYouTube(url: string): boolean {
+  return getYouTubeVideoId(url) !== null;
+}
+
+function getYouTubeEmbedUrl(url: string): string {
+  const id = getYouTubeVideoId(url);
+  return id ? `https://www.youtube.com/embed/${id}?autoplay=1` : '';
+}
+
 export function GalleryLightbox({
   items,
   currentIndex,
@@ -40,6 +58,7 @@ export function GalleryLightbox({
   if (!url) return null;
 
   const video = isVideo(url);
+  const youtube = isYouTube(url);
   const external = isExternalUrl(url);
 
   return (
@@ -86,7 +105,15 @@ export function GalleryLightbox({
         className="max-w-[90vw] max-h-[90vh] flex items-center justify-center"
         onClick={(e) => e.stopPropagation()}
       >
-        {video ? (
+        {youtube ? (
+          <iframe
+            src={getYouTubeEmbedUrl(url)}
+            title="YouTube video"
+            className="w-full aspect-video max-h-[90vh] rounded-lg"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          />
+        ) : video ? (
           <video
             src={url}
             controls

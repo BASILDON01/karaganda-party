@@ -346,8 +346,12 @@ export default function PartyPage({ params }: { params: Promise<{ slug: string }
                 <h2 className="text-2xl font-bold tracking-wider">ГАЛЕРЕЯ</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {party.gallery.map((item, index) => {
-                    const isVideo = typeof item === 'string' && (item.startsWith('data:video') || item.includes('/video') || /\.(mp4|webm|ogg)(\?|$)/i.test(item));
-                    const isExternal = typeof item === 'string' && item.startsWith('http');
+                    const url = typeof item === 'string' ? item : '';
+                    const isVideo = url.startsWith('data:video') || url.includes('/video') || /\.(mp4|webm|ogg)(\?|$)/i.test(url);
+                    const ytId = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/)?.[1] || url.match(/youtube\.com\/watch\?.+&v=([a-zA-Z0-9_-]{11})/)?.[1];
+                    const isYouTube = Boolean(ytId);
+                    const ytThumb = ytId ? `https://img.youtube.com/vi/${ytId}/hqdefault.jpg` : '';
+                    const isExternal = url.startsWith('http');
                     return (
                       <button
                         key={index}
@@ -355,7 +359,22 @@ export default function PartyPage({ params }: { params: Promise<{ slug: string }
                         onClick={() => setGalleryIndex(index)}
                         className="relative aspect-video rounded-xl overflow-hidden bg-muted focus:outline-none focus:ring-2 focus:ring-primary"
                       >
-                        {isVideo ? (
+                        {isYouTube ? (
+                          <div className="relative w-full h-full">
+                            <img
+                              src={ytThumb}
+                              alt={`${party.name} gallery ${index + 1}`}
+                              className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                            />
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/30 pointer-events-none">
+                              <div className="w-14 h-14 rounded-full bg-red-600 flex items-center justify-center">
+                                <svg className="w-6 h-6 text-white ml-1" fill="currentColor" viewBox="0 0 24 24">
+                                  <path d="M8 5v14l11-7z" />
+                                </svg>
+                              </div>
+                            </div>
+                          </div>
+                        ) : isVideo ? (
                           <div className="relative w-full h-full">
                             <video
                               src={item}
