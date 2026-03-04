@@ -6,7 +6,11 @@ import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 function isVideo(url: string): boolean {
-  return url.startsWith('data:video') || url.includes('/video');
+  return url.startsWith('data:video') || url.includes('/video') || /\.(mp4|webm|ogg)(\?|$)/i.test(url);
+}
+
+function isExternalUrl(url: string): boolean {
+  return url.startsWith('http://') || url.startsWith('https://');
 }
 
 export function GalleryLightbox({
@@ -36,6 +40,7 @@ export function GalleryLightbox({
   if (!url) return null;
 
   const video = isVideo(url);
+  const external = isExternalUrl(url);
 
   return (
     <div
@@ -88,6 +93,12 @@ export function GalleryLightbox({
             autoPlay
             playsInline
             className="max-w-full max-h-[90vh] rounded-lg"
+          />
+        ) : external ? (
+          <img
+            src={url}
+            alt=""
+            className="max-w-full max-h-[90vh] w-auto h-auto object-contain rounded-lg"
           />
         ) : (
           <Image

@@ -346,7 +346,8 @@ export default function PartyPage({ params }: { params: Promise<{ slug: string }
                 <h2 className="text-2xl font-bold tracking-wider">ГАЛЕРЕЯ</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                   {party.gallery.map((item, index) => {
-                    const isVideo = typeof item === 'string' && (item.startsWith('data:video') || item.includes('/video'));
+                    const isVideo = typeof item === 'string' && (item.startsWith('data:video') || item.includes('/video') || /\.(mp4|webm|ogg)(\?|$)/i.test(item));
+                    const isExternal = typeof item === 'string' && item.startsWith('http');
                     return (
                       <button
                         key={index}
@@ -371,6 +372,12 @@ export default function PartyPage({ params }: { params: Promise<{ slug: string }
                               </div>
                             </div>
                           </div>
+                        ) : isExternal ? (
+                          <img
+                            src={item}
+                            alt={`${party.name} gallery ${index + 1}`}
+                            className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                          />
                         ) : (
                           <Image
                             src={item}

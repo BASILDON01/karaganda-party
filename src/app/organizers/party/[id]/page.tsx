@@ -7,6 +7,7 @@ import Image from 'next/image';
 import {
   ChevronLeft,
   ImagePlus,
+  Link as LinkIcon,
   Music,
   Ticket,
   Users,
@@ -14,7 +15,6 @@ import {
   Plus,
   Trash2,
   Save,
-  Upload,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -41,9 +41,7 @@ export default function OrganizerPartyPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState<'gallery' | 'lineup' | 'tickets' | 'purchasers'>('gallery');
-  const galleryInputRef = useRef<HTMLInputElement>(null);
-  const lineupImageRef = useRef<HTMLInputElement>(null);
-  const lineupImageIdxRef = useRef<number | null>(null);
+  const [galleryUrl, setGalleryUrl] = useState('');
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -67,34 +65,23 @@ export default function OrganizerPartyPage() {
     return () => { cancelled = true; };
   }, [isAuthenticated, isLoading, id, router]);
 
-  const handleGalleryAdd = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const isImage = file.type.startsWith('image/');
-    const isVideo = file.type.startsWith('video/');
-    if (!isImage && !isVideo) {
-      toast.error('Выберите фото или видео');
-      return;
-    }
-    const maxSize = isVideo ? 5 * 1024 * 1024 : 2 * 1024 * 1024;
-    if (file.size > maxSize) {
-      toast.error(isVideo ? 'Видео до 5 МБ для надёжной загрузки' : 'Фото до 2 МБ');
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => {
-      const url = reader.result as string;
-      const gallery = [...(party?.gallery ?? []), url];
-      setParty((p) => (p ? { ...p, gallery } : null));
-    };
-    reader.readAsDataURL(file);
-    e.target.value = '';
-  };
-
   const handleGalleryRemove = (idx: number) => {
     const gallery = [...(party?.gallery ?? [])];
     gallery.splice(idx, 1);
     setParty((p) => (p ? { ...p, gallery } : null));
+  };
+
+  const handleGalleryAddByUrl = () => {
+    const url = galleryUrl.trim();
+    if (!url) return;
+    if (!url.startsWith('http://') && !url.startsWith('https://')) {
+      toast.error('Введите ссылку, начинающуюся с https://');
+      return;
+    }
+    const gallery = [...(party?.gallery ?? []), url];
+    setParty((p) => (p ? { ...p, gallery } : null));
+    setGalleryUrl('');
+    toast.success('Добавлено по ссылке');
   };
 
   const handleLineupAdd = () => {
@@ -112,27 +99,6 @@ export default function OrganizerPartyPage() {
   const handleLineupRemove = (idx: number) => {
     const lineup = party?.lineup?.filter((_, i) => i !== idx) ?? [];
     setParty((p) => (p ? { ...p, lineup } : null));
-  };
-
-  const handleLineupImageClick = (idx: number) => {
-    lineupImageIdxRef.current = idx;
-    lineupImageRef.current?.click();
-  };
-
-  const handleLineupImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    const idx = lineupImageIdxRef.current;
-    if (!file || !file.type.startsWith('image/') || idx == null) return;
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error('Размер файла не более 2 МБ');
-      return;
-    }
-    const reader = new FileReader();
-    reader.onload = () => {
-      handleLineupUpdate(idx, 'image', reader.result as string);
-    };
-    reader.readAsDataURL(file);
-    e.target.value = '';
   };
 
   const handleTicketQuantityChange = (ttId: string, val: number) => {
@@ -235,34 +201,35 @@ export default function OrganizerPartyPage() {
         <div className="glow-card rounded-2xl p-6 border border-white/10">
           {activeTab === 'gallery' && (
             <div>
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-lg font-semibold">Галерея</h2>
-                <div className="flex gap-2">
-                  <input
-                    ref={galleryInputRef}
-                    type="file"
-                    accept="image/*,video/*"
-                    className="hidden"
-                    onChange={handleGalleryAdd}
+              <div className="mb-4">
+                <h2 className="text-lg font-semibold mb-3">Галерея</h2>
+                <p className="text-sm text-muted-foreground mb-3">
+                  Добавляйте по ссылке — видео и фото хранятся на стороннем сервисе (Cloudinary, Vimeo, YouTube, imgur и т.д.), сайт работает быстрее.
+                </p>
+                <div className="flex flex-wrap gap-2 mb-3">
+                  <Input
+                    placeholder="Ссылка на фото или видео (https://...)"
+                    value={galleryUrl}
+                    onChange={(e) => setGalleryUrl(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleGalleryAddByUrl()}
+                    className="max-w-sm"
                   />
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => galleryInputRef.current?.click()}
-                    className="gap-2"
-                  >
-                    <Upload className="w-4 h-4" />
-                    Добавить фото или видео
+                  <Button variant="outline" size="sm" onClick={handleGalleryAddByUrl} className="gap-2">
+                    <LinkIcon className="w-4 h-4" />
+                    Добавить по ссылке
                   </Button>
                 </div>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                 {(party.gallery ?? []).map((url, idx) => {
-                  const isVideo = typeof url === 'string' && (url.startsWith('data:video') || url.includes('video'));
+                  const isVideo = typeof url === 'string' && (url.startsWith('data:video') || url.includes('video') || /\.(mp4|webm|ogg)(\?|$)/i.test(url));
+                  const isExternal = typeof url === 'string' && url.startsWith('http');
                   return (
                   <div key={idx} className="relative group aspect-square rounded-xl overflow-hidden bg-muted">
                     {isVideo ? (
                       <video src={url} className="w-full h-full object-cover" muted playsInline />
+                    ) : isExternal ? (
+                      <img src={url} alt="" className="w-full h-full object-cover" />
                     ) : (
                       <Image src={url} alt="" fill className="object-cover" />
                     )}
@@ -275,12 +242,6 @@ export default function OrganizerPartyPage() {
                   </div>
                   );
                 })}
-                <button
-                  onClick={() => galleryInputRef.current?.click()}
-                  className="aspect-square rounded-xl border-2 border-dashed border-white/20 hover:border-primary/50 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors"
-                >
-                  <Plus className="w-8 h-8" />
-                </button>
               </div>
             </div>
           )}
@@ -294,38 +255,39 @@ export default function OrganizerPartyPage() {
                   Добавить
                 </Button>
               </div>
-              <input
-                ref={lineupImageRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={handleLineupImageChange}
-              />
               <div className="space-y-4">
                 {(party.lineup ?? []).map((artist, idx) => (
-                  <div key={artist.id} className="flex gap-4 items-center p-4 rounded-xl bg-white/5 border border-white/5">
-                    <button
-                      type="button"
-                      onClick={() => handleLineupImageClick(idx)}
-                      className="relative w-16 h-16 rounded-xl overflow-hidden bg-muted shrink-0 border-2 border-dashed border-white/20 hover:border-primary/50 flex items-center justify-center group"
-                    >
+                  <div key={artist.id} className="flex flex-wrap gap-3 items-center p-4 rounded-xl bg-white/5 border border-white/5">
+                    <div className="relative w-16 h-16 rounded-xl overflow-hidden bg-muted shrink-0">
                       {artist.image ? (
-                        <Image src={artist.image} alt="" fill className="object-cover" />
+                        artist.image.startsWith('http') ? (
+                          <img src={artist.image} alt="" className="w-full h-full object-cover" />
+                        ) : (
+                          <Image src={artist.image} alt="" fill className="object-cover" />
+                        )
                       ) : (
-                        <ImagePlus className="w-6 h-6 text-muted-foreground group-hover:text-primary" />
+                        <div className="w-full h-full flex items-center justify-center">
+                          <ImagePlus className="w-6 h-6 text-muted-foreground" />
+                        </div>
                       )}
-                    </button>
+                    </div>
                     <Input
                       placeholder="Имя"
                       value={artist.name}
                       onChange={(e) => handleLineupUpdate(idx, 'name', e.target.value)}
-                      className="flex-1"
+                      className="flex-1 min-w-[120px]"
                     />
                     <Input
                       placeholder="Роль (DJ, MC...)"
                       value={artist.role}
                       onChange={(e) => handleLineupUpdate(idx, 'role', e.target.value)}
                       className="w-32"
+                    />
+                    <Input
+                      placeholder="Ссылка на фото"
+                      value={artist.image?.startsWith('http') ? artist.image : ''}
+                      onChange={(e) => handleLineupUpdate(idx, 'image', e.target.value.trim())}
+                      className="flex-1 min-w-[140px] text-sm"
                     />
                     <Button variant="ghost" size="icon" onClick={() => handleLineupRemove(idx)}>
                       <Trash2 className="w-4 h-4 text-red-500" />
