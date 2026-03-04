@@ -34,10 +34,22 @@ export function PartyListWithFilters({ parties }: PartyListWithFiltersProps) {
   const updateParams = useCallback(
     (updates: { q?: string; tag?: string; date?: string; age?: string }) => {
       const next = new URLSearchParams(searchParams.toString());
-      if (updates.q !== undefined) (updates.q ? next.set('q', updates.q) : next.delete('q'));
-      if (updates.tag !== undefined) (updates.tag ? next.set('tag', updates.tag) : next.delete('tag'));
-      if (updates.date !== undefined) (updates.date ? next.set('date', updates.date) : next.delete('date'));
-      if (updates.age !== undefined) (updates.age ? next.set('age', updates.age) : next.delete('age'));
+      if (updates.q !== undefined) {
+        if (updates.q) next.set('q', updates.q);
+        else next.delete('q');
+      }
+      if (updates.tag !== undefined) {
+        if (updates.tag) next.set('tag', updates.tag);
+        else next.delete('tag');
+      }
+      if (updates.date !== undefined) {
+        if (updates.date) next.set('date', updates.date);
+        else next.delete('date');
+      }
+      if (updates.age !== undefined) {
+        if (updates.age) next.set('age', updates.age);
+        else next.delete('age');
+      }
       router.replace('?' + next.toString(), { scroll: false });
     },
     [router, searchParams]

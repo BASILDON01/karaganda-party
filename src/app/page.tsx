@@ -2,6 +2,7 @@ import { Hero } from '@/components/hero';
 import { PartyListWithFilters } from '@/components/party-list-with-filters';
 import { organizers } from '@/lib/mock-data';
 import { getUpcomingParties } from '@/lib/parties-store';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Sparkles } from 'lucide-react';
 import Link from 'next/link';
