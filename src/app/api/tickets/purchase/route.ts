@@ -3,6 +3,8 @@ import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/session";
 import { addPurchasedTickets } from "@/lib/tickets-store";
 import { getPartyBySlug, incrementPartySold } from "@/lib/parties-store";
+import { createPendingOrder, generateOrderId } from "@/lib/orders-store";
+import { createPaymentInvoice } from "@/lib/payment-provider";
 
 type Body = {
   partySlug: string;
@@ -44,6 +46,40 @@ export async function POST(req: Request) {
     return NextResponse.json({ ok: false, error: "no_valid_tickets" }, { status: 400 });
   }
 
+  const amount = ticketSelections.reduce((sum, { ticketType, quantity }) => sum + ticketType.price * quantity, 0);
+  const origin = req.headers.get("origin") || req.headers.get("referer") || "";
+  const baseUrl = origin ? new URL(origin).origin : process.env.NEXT_PUBLIC_APP_URL || "https://factorkz.kz";
+
+  const orderId = generateOrderId();
+  const returnUrl = `${baseUrl}/payment/success?orderId=${encodeURIComponent(orderId)}`;
+
+  const invoice = await createPaymentInvoice({
+    orderId,
+    amount,
+    description: `Билеты: ${party.name}`,
+    returnUrl,
+    paymentMethod: body.paymentMethod,
+  });
+
+  if (invoice) {
+    createPendingOrder({
+      id: orderId,
+      userId: user.id,
+      party,
+      selections: body.selections,
+      amount,
+      paymentMethod: body.paymentMethod,
+      externalInvoiceId: invoice.invoiceId,
+    });
+    return NextResponse.json({
+      ok: true,
+      redirectToPayment: true,
+      paymentUrl: invoice.paymentUrl,
+      orderId,
+    });
+  }
+
+  // Тестовый режим: сразу создаём билеты
   const created = addPurchasedTickets({
     userId: user.id,
     party,

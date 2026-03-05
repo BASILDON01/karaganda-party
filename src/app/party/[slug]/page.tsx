@@ -205,6 +205,13 @@ export default function PartyPage({ params }: { params: Promise<{ slug: string }
       }
 
       const data = await res.json();
+
+      if (data?.ok && data.redirectToPayment && data.paymentUrl) {
+        toast.success('Переход на страницу оплаты...');
+        window.location.href = data.paymentUrl;
+        return;
+      }
+
       if (data?.ok && Array.isArray(data.tickets)) {
         addTickets(data.tickets);
       }
