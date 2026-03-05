@@ -6,6 +6,7 @@ import { Calendar, Clock, MapPin, Users, Flame } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { formatPrice, formatDate, getTicketAvailability } from '@/lib/mock-data';
 import type { Party } from '@/lib/types';
+import { getPartyCardImageUrl } from '@/lib/image-utils';
 
 interface PartyCardProps {
   party: Party;
@@ -24,10 +25,12 @@ export function PartyCard({ party }: PartyCardProps) {
         {/* Image */}
         <div className="relative aspect-[16/10] overflow-hidden">
           <Image
-            src={party.image}
+            src={getPartyCardImageUrl(party.image)}
             alt={party.name}
             fill
             className="object-cover transition-transform duration-500 group-hover:scale-110"
+            quality={90}
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
 

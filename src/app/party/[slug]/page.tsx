@@ -28,6 +28,7 @@ import { useAuth } from '@/lib/auth-context';
 import { GalleryLightbox } from '@/components/gallery-lightbox';
 import { useTickets } from '@/lib/tickets-context';
 import { toast } from 'sonner';
+import { getPartyHeroImageUrl } from '@/lib/image-utils';
 
 interface TicketSelection {
   [ticketTypeId: string]: number;
@@ -187,11 +188,13 @@ export default function PartyPage({ params }: { params: Promise<{ slug: string }
       {/* Hero */}
       <section className="relative h-[50vh] md:h-[60vh] overflow-hidden">
         <Image
-          src={party.image}
+          src={getPartyHeroImageUrl(party.image)}
           alt={party.name}
           fill
           className="object-cover"
           priority
+          quality={95}
+          sizes="100vw"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-transparent" />
