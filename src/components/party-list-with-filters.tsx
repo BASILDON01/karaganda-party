@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { PartyCard } from '@/components/party-card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowRight, Filter, TrendingUp } from 'lucide-react';
+import { ArrowRight, Filter } from 'lucide-react';
 import type { Party } from '@/lib/types';
 import { getDefaultCity } from '@/lib/cities';
 
@@ -186,22 +186,13 @@ export function PartyListWithFilters({ parties }: PartyListWithFiltersProps) {
 
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between mb-10">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
-                <TrendingUp className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <h2 className="text-3xl md:text-4xl font-bold tracking-wider">ГОРЯЧИЕ ПАТИ</h2>
-                <p className="text-muted-foreground text-sm mt-1">Самые популярные события</p>
-              </div>
-            </div>
-            <Link href="/all" className="hidden md:flex">
-              <Button variant="ghost" className="gap-2">
+          <div className="flex justify-end mb-6">
+            <Button variant="ghost" className="gap-2" asChild>
+              <Link href="/all">
                 Все события
                 <ArrowRight className="w-4 h-4" />
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
           <div className="party-grid">
             {filteredParties.map((party) => (
@@ -214,12 +205,12 @@ export function PartyListWithFilters({ parties }: PartyListWithFiltersProps) {
             </p>
           )}
           <div className="md:hidden mt-8 text-center">
-            <Link href="/all">
-              <Button variant="outline" className="gap-2">
+            <Button variant="outline" className="gap-2" asChild>
+              <Link href="/all">
                 Все события
                 <ArrowRight className="w-4 h-4" />
-              </Button>
-            </Link>
+              </Link>
+            </Button>
           </div>
         </div>
       </section>

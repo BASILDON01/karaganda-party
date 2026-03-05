@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState } from 'react';
-import { Menu, Ticket, User, Plus, LogOut, Settings, Calendar, Shield } from 'lucide-react';
+import { Menu, Ticket, User, LogOut, Settings, Calendar, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useAuth } from '@/lib/auth-context';
@@ -107,13 +107,6 @@ export function Header() {
                 </Button>
               </Link>
             )}
-            <Link href="/create-party" className="hidden md:flex">
-              <Button size="sm" className="gap-2">
-                <Plus className="w-4 h-4" />
-                Создать пати
-              </Button>
-            </Link>
-
             {/* Mobile Menu */}
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger asChild className="md:hidden">
@@ -209,12 +202,6 @@ export function Header() {
                         </Button>
                       </Link>
                     )}
-                    <Link href="/create-party" onClick={() => setIsOpen(false)}>
-                      <Button className="w-full justify-start gap-3 h-12 mt-4">
-                        <Plus className="w-5 h-5" />
-                        Создать пати
-                      </Button>
-                    </Link>
                   </div>
                 </div>
               </SheetContent>
