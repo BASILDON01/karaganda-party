@@ -129,7 +129,7 @@ export default function HomePage() {
                 <span className="text-xl font-bold">FactorKZ</span>
               </div>
               <p className="text-sm text-muted-foreground">
-                Лучшие вечеринки Караганды в одном месте
+                Лучшие вечеринки твоего города в одном месте
               </p>
             </div>
 
