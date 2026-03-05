@@ -6,7 +6,6 @@ import {
   Shield,
 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import { SupportChatTrigger } from "@/components/support-chat-trigger";
 
 const faq = [
@@ -42,16 +41,6 @@ export default function HelpPage() {
     <div className="min-h-screen pt-24 pb-16">
       <div className="container mx-auto px-4 max-w-2xl">
         <div className="glow-card rounded-2xl p-8 mb-8">
-          <div className="flex items-center gap-3 mb-8">
-            <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
-              <HelpCircle className="w-6 h-6 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-3xl md:text-4xl font-bold tracking-wider">Помощь</h1>
-              <p className="text-muted-foreground text-sm mt-1">Частые вопросы и контакты поддержки</p>
-            </div>
-          </div>
-
           <div className="space-y-6 mb-10">
             {faq.map((item) => {
               const Icon = item.icon;
@@ -92,12 +81,6 @@ export default function HelpPage() {
               </a>
             </div>
           </div>
-        </div>
-
-        <div className="flex">
-          <a href="/login">
-            <Button variant="ghost">Войти</Button>
-          </a>
         </div>
       </div>
     </div>
