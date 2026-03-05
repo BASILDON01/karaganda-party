@@ -127,7 +127,15 @@ export default function CalendarPage() {
                               ? 'bg-white/5 border border-white/10 opacity-60 hover:bg-white/10'
                               : 'bg-primary/10 border border-primary/30 hover:bg-primary/20')
                           : 'border border-transparent hover:bg-white/5'
-                      } ${isSelected ? 'ring-2 ring-primary' : (isToday ? 'ring-2 ring-primary/60' : '')}`}
+                      } ${
+                        isSelected
+                          ? isPastDay
+                            ? 'ring-2 ring-white/30'
+                            : 'ring-2 ring-primary'
+                          : isToday
+                            ? 'ring-2 ring-primary/60'
+                            : ''
+                      }`}
                     >
                       <span className={`text-sm font-medium ${hasParties ? (isPastDay ? 'text-muted-foreground' : 'text-primary') : ''}`}>
                         {day}
