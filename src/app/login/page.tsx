@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CheckCircle, ChevronLeft, Shield, Smartphone } from "lucide-react";
+import { CheckCircle, Shield, Smartphone } from "lucide-react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
@@ -123,12 +123,6 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center pt-20 pb-16 px-4">
       <div className="w-full max-w-md">
-        {/* Back */}
-        <Link href="/" className="inline-flex items-center gap-2 text-muted-foreground hover:text-white transition-colors mb-8">
-          <ChevronLeft className="w-4 h-4" />
-          Назад на главную
-        </Link>
-
         {/* Card */}
         <div className="glow-card rounded-2xl p-8 space-y-8">
           {/* Header */}
