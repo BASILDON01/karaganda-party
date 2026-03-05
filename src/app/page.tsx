@@ -144,7 +144,6 @@ export default function HomePage() {
               <h4 className="font-semibold mb-4">Организаторам</h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><Link href="/create-party" className="hover:text-white transition-colors">Создать пати</Link></li>
-                <li><Link href="/pricing" className="hover:text-white transition-colors">Тарифы</Link></li>
                 <li><Link href="/docs" className="hover:text-white transition-colors">Документация</Link></li>
               </ul>
             </div>
