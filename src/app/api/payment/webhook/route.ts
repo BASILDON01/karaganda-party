@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import type { Party } from "@/lib/types";
 import { getOrderById, getOrderByExternalId, setOrderPaid } from "@/lib/orders-store";
 import { getPartyBySlug, incrementPartySold } from "@/lib/parties-store";
 import { addPurchasedTickets } from "@/lib/tickets-store";
