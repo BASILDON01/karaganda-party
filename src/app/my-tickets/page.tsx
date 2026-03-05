@@ -190,22 +190,24 @@ export default function MyTicketsPage() {
                                   <h4 className="text-lg font-bold mb-2">
                                     Билет {count > 1 ? `${i + 1} из ${count}` : ''}
                                   </h4>
-                                  <button
-                                    onClick={() => copyQRCode(t.qrCode)}
-                                    className="font-mono text-sm text-muted-foreground mb-4 bg-white/5 rounded-lg px-4 py-2 inline-block hover:bg-white/10 transition-colors cursor-pointer"
-                                  >
-                                    {t.qrCode}
-                                    <span className="ml-2 text-primary">Копировать</span>
-                                  </button>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="gap-2"
-                                    onClick={() => openTelegramBot(t.qrCode)}
-                                  >
-                                    <Send className="w-4 h-4" />
-                                    Открыть в Telegram
-                                  </Button>
+                                  <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 justify-center md:justify-start">
+                                    <button
+                                      onClick={() => copyQRCode(t.qrCode)}
+                                      className="font-mono text-sm text-muted-foreground bg-white/5 rounded-lg px-4 py-2 inline-flex items-center justify-center hover:bg-white/10 transition-colors cursor-pointer w-full sm:w-auto"
+                                    >
+                                      <span className="truncate">{t.qrCode}</span>
+                                      <span className="ml-2 text-primary shrink-0">Копировать</span>
+                                    </button>
+                                    <Button
+                                      variant="outline"
+                                      size="sm"
+                                      className="gap-2 w-full sm:w-auto"
+                                      onClick={() => openTelegramBot(t.qrCode)}
+                                    >
+                                      <Send className="w-4 h-4" />
+                                      Открыть в Telegram
+                                    </Button>
+                                  </div>
                                 </div>
                               </div>
                             ))}
