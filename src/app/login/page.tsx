@@ -130,7 +130,6 @@ export default function LoginPage() {
             <div className="w-16 h-16 rounded-2xl bg-primary flex items-center justify-center mx-auto mb-4 shadow-lg shadow-primary/30">
               <span className="text-white font-bold text-2xl">F</span>
             </div>
-            <h1 className="text-3xl font-bold tracking-wider mb-2">ВХОД</h1>
             <p className="text-muted-foreground">
               Войдите через Telegram для покупки билетов
             </p>
