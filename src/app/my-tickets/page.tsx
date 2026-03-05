@@ -74,20 +74,6 @@ export default function MyTicketsPage() {
   return (
     <div className="min-h-screen pt-24 pb-16">
       <div className="container mx-auto px-4">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-10">
-          <div>
-            <h1 className="text-4xl md:text-5xl font-bold tracking-wider">МОИ БИЛЕТЫ</h1>
-            <p className="text-muted-foreground mt-2">Все ваши купленные билеты в одном месте</p>
-          </div>
-          <Link href="/">
-            <Button variant="outline" className="gap-2">
-              Найти события
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </Link>
-        </div>
-
         {tickets.length === 0 ? (
           <div className="text-center py-20">
             <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
