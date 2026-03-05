@@ -136,7 +136,6 @@ export default function HomePage() {
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li><Link href="/my-tickets" className="hover:text-white transition-colors">Мои билеты</Link></li>
                 <li><Link href="/help" className="hover:text-white transition-colors">Помощь</Link></li>
-                <li><Link href="/refund" className="hover:text-white transition-colors">Возврат</Link></li>
               </ul>
             </div>
 
