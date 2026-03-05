@@ -129,6 +129,8 @@ export interface PartySubmission {
   endTime: string;
   venue: string;
   address: string;
+  /** Город проведения (например: Караганда, Алматы). Опционально для старых заявок. */
+  city?: string;
   dressCode: string;
   ageRestriction: number;
   ticketTypes: Array<{ name: string; price: number; quantity: number; description?: string }>;

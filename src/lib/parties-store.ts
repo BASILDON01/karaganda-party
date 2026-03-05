@@ -87,7 +87,7 @@ export function addPartyFromSubmission(sub: PartySubmission): Party {
     id: venueId,
     name: sub.venue,
     address: sub.address,
-    city: "Караганда",
+    city: sub.city || "Караганда",
   };
   const ticketTypes: TicketType[] = sub.ticketTypes.map((t, i) => ({
     id: `tt-${Date.now()}-${i}`,
@@ -163,6 +163,7 @@ export function updateOrganizerParty(
     lineup?: { id: string; name: string; role: string; image?: string }[];
     ticketTypes?: { id: string; quantity: number }[];
     hashtags?: string[];
+    venue?: { name: string; address: string; city: string };
   }
 ): Party | null {
   const list = readAll();
@@ -194,6 +195,11 @@ export function updateOrganizerParty(
   }
   if (updates.hashtags !== undefined) {
     party.hashtags = updates.hashtags.filter((t) => t.trim().length > 0).map((t) => t.trim().toLowerCase().replace(/^#/, ""));
+  }
+  if (updates.venue !== undefined) {
+    if (updates.venue.name?.trim()) party.venue.name = updates.venue.name.trim();
+    if (updates.venue.address !== undefined) party.venue.address = updates.venue.address.trim();
+    if (updates.venue.city?.trim()) party.venue.city = updates.venue.city.trim();
   }
 
   party.updatedAt = now;

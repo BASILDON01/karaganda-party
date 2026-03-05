@@ -8,6 +8,7 @@ import {
   ChevronLeft,
   ImagePlus,
   Link as LinkIcon,
+  MapPin,
   Music,
   Ticket,
   Users,
@@ -20,6 +21,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useAuth } from '@/lib/auth-context';
+import { getCities } from '@/lib/cities';
 import { toast } from 'sonner';
 import type { Party, Artist, TicketType } from '@/lib/types';
 
@@ -41,7 +43,7 @@ export default function OrganizerPartyPage() {
   const [purchasers, setPurchasers] = useState<Purchaser[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [activeTab, setActiveTab] = useState<'gallery' | 'hashtags' | 'lineup' | 'tickets' | 'purchasers'>('gallery');
+  const [activeTab, setActiveTab] = useState<'gallery' | 'hashtags' | 'venue' | 'lineup' | 'tickets' | 'purchasers'>('gallery');
   const [galleryUrl, setGalleryUrl] = useState('');
   const [hashtagInput, setHashtagInput] = useState('');
 
@@ -103,6 +105,11 @@ export default function OrganizerPartyPage() {
     setParty((p) => (p ? { ...p, lineup } : null));
   };
 
+  const handleVenueChange = (field: 'name' | 'address' | 'city', value: string) => {
+    if (!party?.venue) return;
+    setParty((p) => (p ? { ...p, venue: { ...p.venue, [field]: value } } : null));
+  };
+
   const handleTicketQuantityChange = (ttId: string, val: number) => {
     const q = Math.max(0, val);
     const ticketTypes = party?.ticketTypes?.map((tt) =>
@@ -123,6 +130,7 @@ export default function OrganizerPartyPage() {
           lineup: party.lineup ?? [],
           ticketTypes: party.ticketTypes?.map((tt) => ({ id: tt.id, quantity: tt.quantity })) ?? [],
           hashtags: party.hashtags ?? [],
+          venue: party.venue ? { name: party.venue.name, address: party.venue.address, city: party.venue.city } : undefined,
         }),
       });
       const data = await res.json();
@@ -158,6 +166,7 @@ export default function OrganizerPartyPage() {
   const tabs = [
     { id: 'gallery' as const, label: 'Фото', icon: ImagePlus },
     { id: 'hashtags' as const, label: 'Хештеги', icon: Hash },
+    { id: 'venue' as const, label: 'Место', icon: MapPin },
     { id: 'lineup' as const, label: 'Лайнап', icon: Music },
     { id: 'tickets' as const, label: 'Билеты', icon: Ticket },
     { id: 'purchasers' as const, label: 'Покупатели', icon: Users },
@@ -312,6 +321,47 @@ export default function OrganizerPartyPage() {
                 {(!party.hashtags || party.hashtags.length === 0) && (
                   <p className="text-muted-foreground text-sm">Пока нет хештегов</p>
                 )}
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'venue' && (
+            <div>
+              <h2 className="text-lg font-semibold mb-2">Место проведения</h2>
+              <p className="text-sm text-muted-foreground mb-4">
+                Название площадки, адрес и город. От этого зависит, в каком городе будет отображаться пати и фильтрация.
+              </p>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium mb-2">Город</label>
+                  <select
+                    value={party.venue?.city ?? ''}
+                    onChange={(e) => handleVenueChange('city', e.target.value)}
+                    className="w-full h-12 rounded-lg border border-input bg-background px-3 text-sm"
+                  >
+                    {getCities().map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Название заведения</label>
+                  <Input
+                    value={party.venue?.name ?? ''}
+                    onChange={(e) => handleVenueChange('name', e.target.value)}
+                    placeholder="Club Inferno"
+                    className="h-12"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium mb-2">Адрес</label>
+                  <Input
+                    value={party.venue?.address ?? ''}
+                    onChange={(e) => handleVenueChange('address', e.target.value)}
+                    placeholder="ул. Ерубаева 45"
+                    className="h-12"
+                  />
+                </div>
               </div>
             </div>
           )}

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getSessionUser } from "@/lib/session";
 import { addSubmission } from "@/lib/party-submissions-store";
+import { isCityValid, getDefaultCity } from "@/lib/cities";
 
 export async function POST(req: Request) {
   const user = await getSessionUser();
@@ -16,6 +17,7 @@ export async function POST(req: Request) {
     endTime: string;
     venue: string;
     address: string;
+    city: string;
     dressCode: string;
     ageRestriction: number;
     ticketTypes: Array<{ name: string; price: number; quantity: number; description?: string }>;
@@ -35,6 +37,14 @@ export async function POST(req: Request) {
     );
   }
 
+  const city = body.city ? String(body.city).trim() : getDefaultCity();
+  if (!isCityValid(city)) {
+    return NextResponse.json(
+      { ok: false, error: "invalid_city", message: "Выберите город из списка" },
+      { status: 400 }
+    );
+  }
+
   if (!Array.isArray(body.ticketTypes) || !body.ticketTypes.some((t) => t.name && t.price > 0 && t.quantity > 0)) {
     return NextResponse.json(
       { ok: false, error: "ticket_types", message: "Добавьте хотя бы один тип билета" },
@@ -50,6 +60,7 @@ export async function POST(req: Request) {
     endTime: String(body.endTime ?? "").trim(),
     venue: String(body.venue).trim(),
     address: String(body.address ?? "").trim(),
+    city,
     dressCode: String(body.dressCode ?? "").trim(),
     ageRestriction: Number(body.ageRestriction) || 18,
     ticketTypes: body.ticketTypes.map((t) => ({

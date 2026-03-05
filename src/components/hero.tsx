@@ -5,11 +5,15 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { Search, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { getCities, getDefaultCity } from '@/lib/cities';
 
 export function Hero() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [query, setQuery] = useState('');
+  const cityParam = searchParams.get('city')?.trim() || '';
+  const cities = getCities();
+  const currentCityLabel = cityParam && cities.includes(cityParam) ? cityParam : (cityParam || getDefaultCity());
 
   useEffect(() => {
     const q = searchParams.get('q');
@@ -19,11 +23,18 @@ export function Hero() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const q = query.trim();
-    if (q) {
-      router.push('/?q=' + encodeURIComponent(q));
-    } else {
-      router.push('/');
-    }
+    const params = new URLSearchParams(searchParams.toString());
+    if (q) params.set('q', q);
+    else params.delete('q');
+    router.push('?' + params.toString());
+  };
+
+  const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const value = e.target.value;
+    const params = new URLSearchParams(searchParams.toString());
+    if (value) params.set('city', value);
+    else params.delete('city');
+    router.push('?' + params.toString());
   };
 
   return (
@@ -48,10 +59,24 @@ export function Hero() {
 
       {/* Content */}
       <div className="relative z-10 container mx-auto px-4 py-20 text-center">
-        {/* Badge */}
+        {/* Badge + City selector */}
         <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm mb-8">
-          <MapPin className="w-4 h-4 text-primary" />
-          <span className="text-sm text-white/80">Караганда, Казахстан</span>
+          <MapPin className="w-4 h-4 text-primary shrink-0" />
+          <select
+            value={cityParam}
+            onChange={handleCityChange}
+            className="bg-transparent text-sm text-white/80 focus:outline-none focus:ring-0 cursor-pointer appearance-none pr-6"
+            style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%239ca3af' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 2px center' }}
+          >
+            <option value="">Все города</option>
+            {cityParam && !cities.includes(cityParam) && (
+              <option value={cityParam}>{cityParam}</option>
+            )}
+            {cities.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+          <span className="text-sm text-white/80">Казахстан</span>
         </div>
 
         {/* Title */}
@@ -62,7 +87,7 @@ export function Hero() {
 
         {/* Subtitle */}
         <p className="text-lg md:text-xl text-white/70 max-w-2xl mx-auto mb-10">
-          Билеты на лучшие вечеринки города. Dragon Party, Pizdec Party, Hello Kitty и многое другое.
+          Билеты на лучшие вечеринки {cityParam ? `в ${currentCityLabel}` : 'по всему Казахстану'}. Dragon Party, Pizdec Party, Hello Kitty и многое другое.
         </p>
 
         {/* Search */}

@@ -19,6 +19,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/lib/auth-context';
+import { getCities } from '@/lib/cities';
 import { toast } from 'sonner';
 
 interface TicketTypeForm {
@@ -41,6 +42,7 @@ export default function CreatePartyPage() {
     endTime: '',
     venue: '',
     address: '',
+    city: 'Караганда',
     dressCode: '',
     ageRestriction: '18',
   });
@@ -131,6 +133,7 @@ export default function CreatePartyPage() {
           endTime: formData.endTime || undefined,
           venue: formData.venue.trim(),
           address: formData.address.trim(),
+          city: formData.city,
           dressCode: formData.dressCode.trim() || undefined,
           ageRestriction: Number(formData.ageRestriction) || 18,
           image: coverImage || undefined,
@@ -289,6 +292,19 @@ export default function CreatePartyPage() {
 
             <div className="grid sm:grid-cols-2 gap-4">
               <div>
+                <label className="block text-sm font-medium mb-2">Город *</label>
+                <select
+                  name="city"
+                  value={formData.city}
+                  onChange={handleInputChange}
+                  className="w-full h-12 rounded-lg border border-input bg-background px-3 text-sm"
+                >
+                  {getCities().map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
                 <label className="block text-sm font-medium mb-2">Название заведения *</label>
                 <Input
                   name="venue"
@@ -298,7 +314,7 @@ export default function CreatePartyPage() {
                   className="h-12"
                 />
               </div>
-              <div>
+              <div className="sm:col-span-2">
                 <label className="block text-sm font-medium mb-2">Адрес</label>
                 <Input
                   name="address"

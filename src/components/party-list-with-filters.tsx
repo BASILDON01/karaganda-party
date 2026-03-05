@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Filter, TrendingUp } from 'lucide-react';
 import type { Party } from '@/lib/types';
+import { getDefaultCity } from '@/lib/cities';
 
 function toDateStr(d: Date): string {
   return d.toISOString().slice(0, 10);
@@ -30,9 +31,10 @@ export function PartyListWithFilters({ parties }: PartyListWithFiltersProps) {
   const tag = searchParams.get('tag') ?? '';
   const date = searchParams.get('date') ?? '';
   const age = searchParams.get('age') ?? '';
+  const city = searchParams.get('city') ?? '';
 
   const updateParams = useCallback(
-    (updates: { q?: string; tag?: string; date?: string; age?: string }) => {
+    (updates: { q?: string; tag?: string; date?: string; age?: string; city?: string }) => {
       const next = new URLSearchParams(searchParams.toString());
       if (updates.q !== undefined) {
         if (updates.q) next.set('q', updates.q);
@@ -49,6 +51,10 @@ export function PartyListWithFilters({ parties }: PartyListWithFiltersProps) {
       if (updates.age !== undefined) {
         if (updates.age) next.set('age', updates.age);
         else next.delete('age');
+      }
+      if (updates.city !== undefined) {
+        if (updates.city) next.set('city', updates.city);
+        else next.delete('city');
       }
       router.replace('?' + next.toString(), { scroll: false });
     },
@@ -86,8 +92,12 @@ export function PartyListWithFilters({ parties }: PartyListWithFiltersProps) {
       list = list.filter((p) => (p.ageRestriction ?? 0) >= minAge);
     }
 
+    if (city) {
+      list = list.filter((p) => (p.venue?.city ?? '').trim() === city.trim());
+    }
+
     return list;
-  }, [parties, q, tag, date, age]);
+  }, [parties, q, tag, date, age, city]);
 
   const allHashtags = useMemo(() => {
     const set = new Set<string>();
@@ -95,7 +105,16 @@ export function PartyListWithFilters({ parties }: PartyListWithFiltersProps) {
     return Array.from(set).filter(Boolean).sort();
   }, [parties]);
 
-  const hasActiveFilters = !!q || !!tag || !!date || !!age;
+  const allCities = useMemo(() => {
+    const set = new Set<string>();
+    parties.forEach((p) => {
+      const c = (p.venue?.city ?? '').trim();
+      if (c) set.add(c);
+    });
+    return Array.from(set).sort();
+  }, [parties]);
+
+  const hasActiveFilters = !!q || !!tag || !!date || !!age || !!city;
 
   return (
     <>
@@ -109,7 +128,7 @@ export function PartyListWithFilters({ parties }: PartyListWithFiltersProps) {
             <Badge
               variant={!hasActiveFilters ? 'secondary' : 'outline'}
               className={`cursor-pointer transition-colors px-4 py-2 border-white/20 ${!hasActiveFilters ? 'bg-primary/20 text-primary' : 'hover:bg-primary hover:text-white'}`}
-              onClick={() => updateParams({ q: '', tag: '', date: '', age: '' })}
+              onClick={() => updateParams({ q: '', tag: '', date: '', age: '', city: '' })}
             >
               Все
             </Badge>
@@ -127,6 +146,16 @@ export function PartyListWithFilters({ parties }: PartyListWithFiltersProps) {
             >
               Эти выходные
             </Badge>
+            {allCities.map((c) => (
+              <Badge
+                key={c}
+                variant="outline"
+                className={`cursor-pointer transition-colors px-4 py-2 border-white/20 ${city === c ? 'bg-primary text-primary-foreground border-primary' : 'hover:bg-primary hover:text-white'}`}
+                onClick={() => updateParams({ city: city === c ? '' : c })}
+              >
+                {c}
+              </Badge>
+            ))}
             {allHashtags.map((t) => (
               <Badge
                 key={t}
