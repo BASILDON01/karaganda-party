@@ -10,7 +10,6 @@ import {
   MapPin,
   Minus,
   Plus,
-  ChevronLeft,
   Shield,
   Share2,
   Heart,
@@ -198,17 +197,6 @@ export default function PartyPage({ params }: { params: Promise<{ slug: string }
         />
         <div className="absolute inset-0 bg-gradient-to-t from-background via-background/50 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-transparent" />
-
-        {/* Back button */}
-        <Link
-          href="/"
-          className="absolute top-4 left-4 md:top-8 md:left-8 z-10"
-        >
-          <Button variant="outline" size="sm" className="gap-2 bg-black/50 backdrop-blur-sm border-white/20">
-            <ChevronLeft className="w-4 h-4" />
-            Назад
-          </Button>
-        </Link>
 
         {/* Actions */}
         <div className="absolute top-4 right-4 md:top-8 md:right-8 z-10 flex gap-2">
