@@ -164,6 +164,7 @@ export function updateOrganizerParty(
     ticketTypes?: { id: string; quantity: number }[];
     hashtags?: string[];
     venue?: { name: string; address: string; city: string };
+    organizerSocialLinks?: { instagram?: string; telegram?: string; website?: string };
   }
 ): Party | null {
   const list = readAll();
@@ -200,6 +201,16 @@ export function updateOrganizerParty(
     if (updates.venue.name?.trim()) party.venue.name = updates.venue.name.trim();
     if (updates.venue.address !== undefined) party.venue.address = updates.venue.address.trim();
     if (updates.venue.city?.trim()) party.venue.city = updates.venue.city.trim();
+  }
+  if (updates.organizerSocialLinks !== undefined) {
+    party.organizer.socialLinks = {
+      ...party.organizer.socialLinks,
+      ...updates.organizerSocialLinks,
+    };
+    const sl = party.organizer.socialLinks;
+    if (sl.instagram === "" || sl.instagram === undefined) delete sl.instagram;
+    if (sl.telegram === "" || sl.telegram === undefined) delete sl.telegram;
+    if (sl.website === "" || sl.website === undefined) delete sl.website;
   }
 
   party.updatedAt = now;

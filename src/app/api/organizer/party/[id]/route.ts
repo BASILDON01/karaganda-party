@@ -30,7 +30,7 @@ export async function PATCH(
   }
 
   const { id } = await params;
-  let body: { gallery?: string[]; lineup?: { id?: string; name: string; role: string; image?: string }[]; ticketTypes?: { id: string; quantity: number }[]; hashtags?: string[]; venue?: { name: string; address: string; city: string } } = {};
+  let body: { gallery?: string[]; lineup?: { id?: string; name: string; role: string; image?: string }[]; ticketTypes?: { id: string; quantity: number }[]; hashtags?: string[]; venue?: { name: string; address: string; city: string }; organizerSocialLinks?: { instagram?: string; telegram?: string; website?: string } } = {};
   try {
     body = await req.json();
   } catch {
@@ -51,6 +51,7 @@ export async function PATCH(
     ticketTypes: body.ticketTypes,
     hashtags: body.hashtags,
     venue: body.venue,
+    organizerSocialLinks: body.organizerSocialLinks,
   });
 
   if (!party) {
