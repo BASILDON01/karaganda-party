@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, use, useEffect } from 'react';
+import { useState, use, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -53,6 +53,26 @@ export default function PartyPage({ params }: { params: Promise<{ slug: string }
   const [paymentMethod, setPaymentMethod] = useState<'kaspi' | 'halyk'>('kaspi');
   const [isProcessing, setIsProcessing] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [isFavoriteLoading, setIsFavoriteLoading] = useState(false);
+
+  const syncFavoriteFromServer = useCallback(async (partyId: string) => {
+    try {
+      const res = await fetch('/api/favorites', { cache: 'no-store' });
+      if (!res.ok) return;
+      const data = (await res.json()) as { ok?: boolean; favoritePartyIds?: string[] };
+      if (data?.ok && Array.isArray(data.favoritePartyIds)) {
+        setIsFavorite(data.favoritePartyIds.includes(partyId));
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  useEffect(() => {
+    if (party && isAuthenticated) {
+      void syncFavoriteFromServer(party.id);
+    }
+  }, [party, isAuthenticated, syncFavoriteFromServer]);
 
   if (party === undefined) {
     return (
@@ -112,9 +132,33 @@ export default function PartyPage({ params }: { params: Promise<{ slug: string }
     }
   };
 
-  const handleFavorite = () => {
-    setIsFavorite(!isFavorite);
-    toast.success(isFavorite ? 'Удалено из избранного' : 'Добавлено в избранное');
+  const handleFavorite = async () => {
+    if (!isAuthenticated) {
+      toast.error('Войдите через Telegram, чтобы добавить в избранное');
+      router.push('/login');
+      return;
+    }
+
+    if (!party) return;
+    if (isFavoriteLoading) return;
+
+    setIsFavoriteLoading(true);
+    try {
+      const method = isFavorite ? 'DELETE' : 'POST';
+      const res = await fetch('/api/favorites', {
+        method,
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ partyId: party.id }),
+      });
+      if (!res.ok) {
+        toast.error('Не удалось обновить избранное');
+        return;
+      }
+      setIsFavorite(!isFavorite);
+      toast.success(!isFavorite ? 'Добавлено в избранное' : 'Удалено из избранного');
+    } finally {
+      setIsFavoriteLoading(false);
+    }
   };
 
   const handlePurchase = async () => {
@@ -213,6 +257,7 @@ export default function PartyPage({ params }: { params: Promise<{ slug: string }
             size="icon"
             className={`bg-black/50 backdrop-blur-sm border-white/20 ${isFavorite ? 'text-red-500' : ''}`}
             onClick={handleFavorite}
+            disabled={isFavoriteLoading}
           >
             <Heart className={`w-4 h-4 ${isFavorite ? 'fill-current' : ''}`} />
           </Button>

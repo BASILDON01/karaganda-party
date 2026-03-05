@@ -8,6 +8,7 @@ export type StoredUser = {
   name: string;
   avatar?: string;
   createdAt: string;
+  favoritePartyIds?: string[];
 };
 
 const DATA_FILE = path.join(process.cwd(), "data", "users.json");
@@ -40,11 +41,14 @@ function writeAll(data: Record<string, StoredUser>) {
 
 export function saveUser(user: StoredUser) {
   const data = readAll();
+  const prev = data[user.id];
   data[user.id] = {
     id: user.id,
     name: user.name,
     avatar: user.avatar,
     createdAt: user.createdAt,
+    // Do not lose previously saved data (e.g. favorites).
+    favoritePartyIds: user.favoritePartyIds ?? prev?.favoritePartyIds ?? [],
   };
   writeAll(data);
 }
@@ -56,4 +60,34 @@ export function getUserById(telegramId: string): StoredUser | null {
 
 export function getUsersCount(): number {
   return Object.keys(readAll()).length;
+}
+
+export function getFavoritePartyIds(userId: string): string[] {
+  const u = getUserById(userId);
+  return Array.isArray(u?.favoritePartyIds) ? u!.favoritePartyIds : [];
+}
+
+export function addFavoritePartyId(userId: string, partyId: string): string[] {
+  const data = readAll();
+  const prev = data[userId];
+  if (!prev) return [];
+  const set = new Set<string>(Array.isArray(prev.favoritePartyIds) ? prev.favoritePartyIds : []);
+  set.add(String(partyId));
+  prev.favoritePartyIds = Array.from(set);
+  data[userId] = prev;
+  writeAll(data);
+  return prev.favoritePartyIds;
+}
+
+export function removeFavoritePartyId(userId: string, partyId: string): string[] {
+  const data = readAll();
+  const prev = data[userId];
+  if (!prev) return [];
+  const next = (Array.isArray(prev.favoritePartyIds) ? prev.favoritePartyIds : []).filter(
+    (id) => id !== String(partyId),
+  );
+  prev.favoritePartyIds = next;
+  data[userId] = prev;
+  writeAll(data);
+  return next;
 }
