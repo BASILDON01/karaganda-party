@@ -22,8 +22,7 @@ export default async function OrganizerPage({
   );
 
   const fromStore = getOrganizerById(id);
-  const inferred =
-    parties[0]?.organizer?.id === id ? parties[0].organizer : null;
+  const inferred = parties[0]?.organizer ?? null;
   const organizer = fromStore ?? inferred;
 
   if (!organizer) {
@@ -116,20 +115,6 @@ export default async function OrganizerPage({
               </div>
             </div>
           </div>
-        </div>
-
-        <div className="mb-6 flex items-end justify-between gap-4">
-          <div>
-            <h2 className="text-2xl font-bold tracking-wider">МЕРОПРИЯТИЯ</h2>
-            <p className="text-sm text-muted-foreground mt-1">
-              {parties.length > 0
-                ? `${parties.length} событие(й)`
-                : "Пока нет опубликованных мероприятий"}
-            </p>
-          </div>
-          <Link href="/">
-            <Button variant="ghost">На главную</Button>
-          </Link>
         </div>
 
         {parties.length > 0 ? (
