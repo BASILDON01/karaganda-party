@@ -4,7 +4,6 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
-  ChevronLeft,
   Upload,
   Calendar,
   Clock,
@@ -172,19 +171,6 @@ export default function CreatePartyPage() {
   return (
     <div className="min-h-screen pt-24 pb-16">
       <div className="container mx-auto px-4 max-w-3xl">
-        {/* Header */}
-        <div className="flex items-center gap-4 mb-8">
-          <Link href="/">
-            <Button variant="ghost" size="icon">
-              <ChevronLeft className="w-5 h-5" />
-            </Button>
-          </Link>
-          <div>
-            <h1 className="text-3xl md:text-4xl font-bold tracking-wider">СОЗДАТЬ ПАТИ</h1>
-            <p className="text-muted-foreground mt-1">Заполните информацию о мероприятии</p>
-          </div>
-        </div>
-
         <form onSubmit={handleSubmit} className="space-y-8">
           {/* Basic info */}
           <div className="glow-card rounded-2xl p-6 space-y-6">
