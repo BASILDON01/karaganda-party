@@ -106,11 +106,21 @@ export default function HomePage() {
                 Размести своё событие на нашей платформе и продавай билеты тысячам гостей Караганды
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                <Button size="xl" variant="secondary" className="bg-white text-primary hover:bg-white/90">
-                  Стать организатором
+                <Button
+                  asChild
+                  size="xl"
+                  variant="secondary"
+                  className="bg-white text-primary hover:bg-white/90"
+                >
+                  <Link href="/create-party">Стать организатором</Link>
                 </Button>
-                <Button size="xl" variant="outline" className="border-white text-white hover:bg-white/10">
-                  Узнать больше
+                <Button
+                  asChild
+                  size="xl"
+                  variant="outline"
+                  className="border-white text-white hover:bg-white/10"
+                >
+                  <Link href="/docs">Узнать больше</Link>
                 </Button>
               </div>
             </div>
