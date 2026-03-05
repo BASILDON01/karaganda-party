@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Search, MapPin } from 'lucide-react';
+import { Search, MapPin, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { getCities, getDefaultCity } from '@/lib/cities';
@@ -11,14 +11,25 @@ export function Hero() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [query, setQuery] = useState('');
+  const [cityOpen, setCityOpen] = useState(false);
+  const cityRef = useRef<HTMLDivElement>(null);
   const cityParam = searchParams.get('city')?.trim() || '';
   const cities = getCities();
   const currentCityLabel = cityParam && cities.includes(cityParam) ? cityParam : (cityParam || getDefaultCity());
+  const displayCity = cityParam || 'Все города';
 
   useEffect(() => {
     const q = searchParams.get('q');
     setQuery(q ?? '');
   }, [searchParams]);
+
+  useEffect(() => {
+    const close = (e: MouseEvent) => {
+      if (cityRef.current && !cityRef.current.contains(e.target as Node)) setCityOpen(false);
+    };
+    document.addEventListener('click', close);
+    return () => document.removeEventListener('click', close);
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,12 +40,12 @@ export function Hero() {
     router.push('?' + params.toString());
   };
 
-  const handleCityChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = e.target.value;
+  const selectCity = (value: string) => {
     const params = new URLSearchParams(searchParams.toString());
     if (value) params.set('city', value);
     else params.delete('city');
     router.push('?' + params.toString());
+    setCityOpen(false);
   };
 
   return (
@@ -60,23 +71,40 @@ export function Hero() {
       {/* Content */}
       <div className="relative z-10 container mx-auto px-4 py-20 text-center">
         {/* Badge + City selector */}
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm mb-8">
-          <MapPin className="w-4 h-4 text-primary shrink-0" />
-          <select
-            value={cityParam}
-            onChange={handleCityChange}
-            className="bg-transparent text-sm text-white/80 focus:outline-none focus:ring-0 cursor-pointer appearance-none pr-6"
-            style={{ backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%239ca3af' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10l-5 5z'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 2px center' }}
-          >
-            <option value="">Все города</option>
-            {cityParam && !cities.includes(cityParam) && (
-              <option value={cityParam}>{cityParam}</option>
+        <div className="flex flex-wrap items-center justify-center gap-2 mb-8">
+          <div ref={cityRef} className="relative inline-flex">
+            <button
+              type="button"
+              onClick={() => setCityOpen((v) => !v)}
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 backdrop-blur-sm hover:bg-white/10 transition-colors text-left"
+            >
+              <MapPin className="w-4 h-4 text-primary shrink-0" />
+              <span className="text-sm text-white/90 min-w-[6rem]">{displayCity}</span>
+              <ChevronDown className={`w-4 h-4 text-white/60 transition-transform ${cityOpen ? 'rotate-180' : ''}`} />
+            </button>
+            <span className="inline-flex items-center pl-2 text-sm text-white/80">Казахстан</span>
+            {cityOpen && (
+              <div className="absolute top-full left-1/2 -translate-x-1/2 mt-2 py-2 rounded-xl bg-background/95 border border-white/10 shadow-xl backdrop-blur-xl z-50 max-h-[70vh] overflow-y-auto min-w-[12rem]">
+                <button
+                  type="button"
+                  onClick={() => selectCity('')}
+                  className={`block w-full px-4 py-2.5 text-left text-sm transition-colors ${!cityParam ? 'bg-primary/20 text-primary' : 'text-white hover:bg-white/10'}`}
+                >
+                  Все города
+                </button>
+                {cities.map((c) => (
+                  <button
+                    key={c}
+                    type="button"
+                    onClick={() => selectCity(c)}
+                    className={`block w-full px-4 py-2.5 text-left text-sm transition-colors ${cityParam === c ? 'bg-primary/20 text-primary' : 'text-white hover:bg-white/10'}`}
+                  >
+                    {c}
+                  </button>
+                ))}
+              </div>
             )}
-            {cities.map((c) => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-          </select>
-          <span className="text-sm text-white/80">Казахстан</span>
+          </div>
         </div>
 
         {/* Title */}
