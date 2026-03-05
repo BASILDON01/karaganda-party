@@ -14,7 +14,7 @@ export const dynamic = 'force-dynamic';
 
 export default function HomePage() {
   const upcomingParties = getUpcomingParties();
-  const organizers = getFeaturedOrganizers(3);
+  const organizers = getFeaturedOrganizers(12);
   const botUsername = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || "factorkz_bot";
 
   return (
@@ -50,7 +50,7 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {organizers.map((org) => (
               <Link
                 key={org.id}
