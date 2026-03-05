@@ -17,7 +17,8 @@ const MONTHS = [
 const DAYS = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
 
 export default function CalendarPage() {
-  const [currentDate, setCurrentDate] = useState(new Date(2026, 2, 1)); // March 2026
+  const [currentDate, setCurrentDate] = useState(() => new Date());
+  const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const [parties, setParties] = useState<Party[]>([]);
 
   useEffect(() => {
@@ -36,10 +37,12 @@ export default function CalendarPage() {
   const totalDays = lastDayOfMonth.getDate();
 
   const prevMonth = () => {
+    setSelectedDay(null);
     setCurrentDate(new Date(year, month - 1, 1));
   };
 
   const nextMonth = () => {
+    setSelectedDay(null);
     setCurrentDate(new Date(year, month + 1, 1));
   };
 
@@ -63,6 +66,11 @@ export default function CalendarPage() {
     const partyDate = new Date(p.date);
     return partyDate.getMonth() === month && partyDate.getFullYear() === year;
   }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  const selectedEvents = selectedDay ? getPartiesForDay(selectedDay) : monthEvents;
 
   return (
     <div className="min-h-screen pt-24 pb-16">
@@ -102,30 +110,39 @@ export default function CalendarPage() {
 
                   const dayParties = getPartiesForDay(day);
                   const hasParties = dayParties.length > 0;
-                  const isToday = new Date().getDate() === day &&
-                    new Date().getMonth() === month &&
-                    new Date().getFullYear() === year;
+                  const dayDate = new Date(year, month, day);
+                  dayDate.setHours(0, 0, 0, 0);
+                  const isPastDay = dayDate.getTime() < today.getTime();
+                  const isToday = dayDate.getTime() === today.getTime();
+                  const isSelected = selectedDay === day;
 
                   return (
-                    <div
+                    <button
+                      type="button"
                       key={day}
-                      className={`aspect-square rounded-xl p-1 flex flex-col items-center justify-start transition-all ${
+                      onClick={() => setSelectedDay(day)}
+                      className={`aspect-square rounded-xl p-1 flex flex-col items-center justify-start transition-all cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 ${
                         hasParties
-                          ? 'bg-primary/10 border border-primary/30 cursor-pointer hover:bg-primary/20'
-                          : 'hover:bg-white/5'
-                      } ${isToday ? 'ring-2 ring-primary' : ''}`}
+                          ? (isPastDay
+                              ? 'bg-white/5 border border-white/10 opacity-60 hover:bg-white/10'
+                              : 'bg-primary/10 border border-primary/30 hover:bg-primary/20')
+                          : 'border border-transparent hover:bg-white/5'
+                      } ${isSelected ? 'ring-2 ring-primary' : (isToday ? 'ring-2 ring-primary/60' : '')}`}
                     >
-                      <span className={`text-sm font-medium ${hasParties ? 'text-primary' : ''}`}>
+                      <span className={`text-sm font-medium ${hasParties ? (isPastDay ? 'text-muted-foreground' : 'text-primary') : ''}`}>
                         {day}
                       </span>
                       {hasParties && (
                         <div className="flex gap-0.5 mt-1">
                           {dayParties.slice(0, 3).map((_, i) => (
-                            <div key={i} className="w-1.5 h-1.5 rounded-full bg-primary" />
+                            <div
+                              key={i}
+                              className={`w-1.5 h-1.5 rounded-full ${isPastDay ? 'bg-white/30' : 'bg-primary'}`}
+                            />
                           ))}
                         </div>
                       )}
-                    </div>
+                    </button>
                   );
                 })}
               </div>
@@ -135,17 +152,21 @@ export default function CalendarPage() {
           {/* Events list */}
           <div className="space-y-6">
             <h3 className="text-xl font-bold tracking-wider">
-              СОБЫТИЯ В {MONTHS[month].toUpperCase()}
+              {selectedDay
+                ? `СОБЫТИЯ ${selectedDay} ${MONTHS[month].toUpperCase()}`
+                : `СОБЫТИЯ В ${MONTHS[month].toUpperCase()}`}
             </h3>
 
-            {monthEvents.length === 0 ? (
+            {selectedEvents.length === 0 ? (
               <div className="glow-card rounded-xl p-6 text-center">
                 <CalendarIcon className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">Нет событий в этом месяце</p>
+                <p className="text-muted-foreground">
+                  {selectedDay ? 'Нет событий в этот день' : 'Нет событий в этом месяце'}
+                </p>
               </div>
             ) : (
               <div className="space-y-4">
-                {monthEvents.map(party => (
+                {selectedEvents.map(party => (
                   <Link key={party.id} href={`/party/${party.slug}`}>
                     <div className="glow-card rounded-xl p-4 flex gap-4 group">
                       <div className="relative w-20 h-20 rounded-lg overflow-hidden shrink-0">
