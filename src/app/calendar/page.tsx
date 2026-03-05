@@ -67,14 +67,6 @@ export default function CalendarPage() {
   return (
     <div className="min-h-screen pt-24 pb-16">
       <div className="container mx-auto px-4">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-10">
-          <div>
-            <h1 className="text-4xl md:text-5xl font-bold tracking-wider">КАЛЕНДАРЬ</h1>
-            <p className="text-muted-foreground mt-2">Все вечеринки по датам</p>
-          </div>
-        </div>
-
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Calendar */}
           <div className="lg:col-span-2">
