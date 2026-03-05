@@ -3,7 +3,6 @@ import { PartyListWithFilters } from '@/components/party-list-with-filters';
 import { getUpcomingParties } from '@/lib/parties-store';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Suspense } from 'react';
@@ -38,18 +37,6 @@ export default function HomePage() {
       {/* Organizers */}
       <section className="py-16 md:py-24 bg-gradient-to-b from-transparent via-primary/5 to-transparent">
         <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between mb-10">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
-                <Sparkles className="w-5 h-5 text-primary" />
-              </div>
-              <div>
-                <h2 className="text-3xl md:text-4xl font-bold tracking-wider">ОРГАНИЗАТОРЫ</h2>
-                <p className="text-muted-foreground text-sm mt-1">Проверенные команды</p>
-              </div>
-            </div>
-          </div>
-
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {organizers.map((org) => (
               <Link
