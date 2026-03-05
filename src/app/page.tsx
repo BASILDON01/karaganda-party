@@ -1,6 +1,5 @@
 import { Hero } from '@/components/hero';
 import { PartyListWithFilters } from '@/components/party-list-with-filters';
-import { organizers } from '@/lib/mock-data';
 import { getUpcomingParties } from '@/lib/parties-store';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -8,12 +7,14 @@ import { Sparkles } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Suspense } from 'react';
+import { getFeaturedOrganizers } from '@/lib/organizers-store';
 
 // Чтобы одобренные пати сразу появлялись на главной (данные из data/parties.json)
 export const dynamic = 'force-dynamic';
 
 export default function HomePage() {
   const upcomingParties = getUpcomingParties();
+  const organizers = getFeaturedOrganizers(3);
   const botUsername = process.env.NEXT_PUBLIC_TELEGRAM_BOT_USERNAME || "factorkz_bot";
 
   return (

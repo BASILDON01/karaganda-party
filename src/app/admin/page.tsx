@@ -9,6 +9,8 @@ import {
   Loader2,
   Calendar,
   MapPin,
+  ChevronUp,
+  ChevronDown,
   Ticket,
   Trash2,
   BarChart3,
@@ -22,6 +24,7 @@ import { useAuth } from '@/lib/auth-context';
 import { toast } from 'sonner';
 import type { PartySubmission } from '@/lib/types';
 import type { Party } from '@/lib/types';
+import type { Organizer } from '@/lib/types';
 
 type SubmissionWithCreator = PartySubmission & {
   creator: { id: string; name: string; avatar?: string; createdAt: string } | null;
@@ -56,6 +59,10 @@ export default function AdminPage() {
   const [supportReply, setSupportReply] = useState('');
   const [supportSending, setSupportSending] = useState(false);
   const [supportClosing, setSupportClosing] = useState<string | null>(null);
+  const [organizers, setOrganizers] = useState<Organizer[]>([]);
+  const [featuredOrganizerIds, setFeaturedOrganizerIds] = useState<string[]>([]);
+  const [organizersSaving, setOrganizersSaving] = useState(false);
+  const [addOrganizerId, setAddOrganizerId] = useState('');
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -67,11 +74,12 @@ export default function AdminPage() {
     async function load() {
       setLoading(true);
       try {
-        const [pendingRes, partiesRes, statsRes, supportRes] = await Promise.all([
+        const [pendingRes, partiesRes, statsRes, supportRes, orgRes] = await Promise.all([
           fetch('/api/admin/parties/pending'),
           fetch('/api/parties'),
           fetch('/api/admin/stats'),
           fetch('/api/support/messages?conversations=1'),
+          fetch('/api/admin/organizers'),
         ]);
         if (cancelled) return;
         if (pendingRes.status === 403 || statsRes.status === 403) {
@@ -87,10 +95,13 @@ export default function AdminPage() {
         const partiesData = await partiesRes.json();
         const statsData = await statsRes.json();
         const supportData = await supportRes.json();
+        const orgData = await orgRes.json();
         if (pendingData?.ok && pendingData.submissions) setSubmissions(pendingData.submissions);
         if (partiesData?.ok && partiesData.parties) setParties(partiesData.parties);
         if (statsData?.ok && statsData.stats) setStats(statsData.stats);
         if (supportData?.ok && supportData.conversations) setSupportConversations(supportData.conversations);
+        if (orgData?.ok && orgData.organizers) setOrganizers(orgData.organizers);
+        if (orgData?.ok && orgData.featuredIds) setFeaturedOrganizerIds(orgData.featuredIds);
       } catch {
         if (!cancelled) toast.error('Ошибка загрузки');
       } finally {
@@ -100,6 +111,34 @@ export default function AdminPage() {
     load();
     return () => { cancelled = true; };
   }, [isLoading, isAuthenticated, router]);
+
+  const featured = featuredOrganizerIds
+    .map((id) => organizers.find((o) => o.id === id))
+    .filter(Boolean) as Organizer[];
+
+  const notFeatured = organizers.filter((o) => !featuredOrganizerIds.includes(o.id));
+
+  async function saveFeaturedOrganizers(nextIds: string[]) {
+    setOrganizersSaving(true);
+    try {
+      const res = await fetch('/api/admin/organizers', {
+        method: 'PATCH',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ featuredIds: nextIds }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data?.ok) {
+        toast.error('Не удалось сохранить топ организаторов');
+        return;
+      }
+      setFeaturedOrganizerIds(data.featuredIds ?? nextIds);
+      toast.success('Топ организаторов обновлён');
+    } catch {
+      toast.error('Ошибка');
+    } finally {
+      setOrganizersSaving(false);
+    }
+  }
 
   async function approve(id: string) {
     setActing(id);
@@ -272,6 +311,134 @@ export default function AdminPage() {
                 </div>
               </section>
             )}
+
+            {/* Топ организаторов */}
+            <section className="mb-10">
+              <div className="flex items-center justify-between gap-4 mb-4">
+                <h2 className="text-xl font-bold tracking-wider">ТОП ОРГАНИЗАТОРЫ</h2>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={organizersSaving || featuredOrganizerIds.length === 0}
+                  onClick={() => void saveFeaturedOrganizers(featuredOrganizerIds)}
+                >
+                  {organizersSaving ? 'Сохраняем…' : 'Сохранить'}
+                </Button>
+              </div>
+
+              {organizers.length === 0 ? (
+                <div className="glow-card rounded-2xl p-6 text-center text-muted-foreground">
+                  Список организаторов ещё не загружен
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <div className="glow-card rounded-2xl p-4 border border-white/10">
+                    {featured.length === 0 ? (
+                      <p className="text-sm text-muted-foreground">Топ пуст. Добавьте организаторов ниже.</p>
+                    ) : (
+                      <ul className="space-y-2">
+                        {featured.map((o, idx) => (
+                          <li key={o.id} className="flex items-center gap-3 p-3 rounded-xl bg-white/5 border border-white/5">
+                            <div className="w-10 h-10 rounded-xl overflow-hidden bg-muted shrink-0">
+                              {o.logo ? (
+                                <img src={o.logo} alt="" className="w-full h-full object-cover" />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-white/50">
+                                  {o.name.slice(0, 1)}
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-medium truncate">{o.name}</p>
+                              <p className="text-xs text-muted-foreground truncate">ID: {o.id}</p>
+                            </div>
+                            <div className="flex items-center gap-1 shrink-0">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                disabled={organizersSaving || idx === 0}
+                                onClick={() => {
+                                  const next = [...featuredOrganizerIds];
+                                  const a = next[idx - 1];
+                                  next[idx - 1] = next[idx];
+                                  next[idx] = a;
+                                  setFeaturedOrganizerIds(next);
+                                  void saveFeaturedOrganizers(next);
+                                }}
+                              >
+                                <ChevronUp className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                disabled={organizersSaving || idx === featured.length - 1}
+                                onClick={() => {
+                                  const next = [...featuredOrganizerIds];
+                                  const a = next[idx + 1];
+                                  next[idx + 1] = next[idx];
+                                  next[idx] = a;
+                                  setFeaturedOrganizerIds(next);
+                                  void saveFeaturedOrganizers(next);
+                                }}
+                              >
+                                <ChevronDown className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                disabled={organizersSaving}
+                                onClick={() => {
+                                  const next = featuredOrganizerIds.filter((id) => id !== o.id);
+                                  setFeaturedOrganizerIds(next);
+                                  void saveFeaturedOrganizers(next);
+                                }}
+                                className="text-red-500 hover:text-red-400 hover:bg-red-500/10"
+                              >
+                                <X className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+
+                  <div className="glow-card rounded-2xl p-4 border border-white/10">
+                    <p className="text-sm font-medium mb-3">Добавить в топ</p>
+                    {notFeatured.length === 0 ? (
+                      <p className="text-sm text-muted-foreground">Все организаторы уже в топе.</p>
+                    ) : (
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        <select
+                          value={addOrganizerId}
+                          onChange={(e) => setAddOrganizerId(e.target.value)}
+                          className="w-full h-10 rounded-lg border border-input bg-background px-3 text-sm"
+                        >
+                          <option value="">Выберите организатора</option>
+                          {notFeatured.map((o) => (
+                            <option key={o.id} value={o.id}>
+                              {o.name}
+                            </option>
+                          ))}
+                        </select>
+                        <Button
+                          variant="outline"
+                          disabled={organizersSaving || !addOrganizerId}
+                          onClick={() => {
+                            const next = [...featuredOrganizerIds, addOrganizerId];
+                            setFeaturedOrganizerIds(next);
+                            setAddOrganizerId('');
+                            void saveFeaturedOrganizers(next);
+                          }}
+                        >
+                          Добавить
+                        </Button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+            </section>
 
             {/* Опубликованные мероприятия — удаление */}
             <section className="mb-10">
