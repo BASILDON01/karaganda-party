@@ -10,6 +10,13 @@ export const metadata: Metadata = {
   title: "FactorKZ - Билеты на вечеринки в Караганде",
   description: "Платформа для покупки билетов на лучшие вечеринки Караганды. Dragon Party, Pizdec Party, Hello Kitty и многое другое.",
   keywords: ["караганда", "вечеринки", "билеты", "party", "клуб", "dj"],
+  icons: {
+    icon: [
+      { url: "/icon.png", type: "image/png", sizes: "48x48" },
+      { url: "/icon", type: "image/svg+xml" },
+    ],
+    apple: "/icon.png",
+  },
 };
 
 export default function RootLayout({
