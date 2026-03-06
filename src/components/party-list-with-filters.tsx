@@ -204,14 +204,6 @@ export function PartyListWithFilters({ parties }: PartyListWithFiltersProps) {
               По вашему запросу ничего не найдено. Попробуйте другие фильтры или поиск.
             </p>
           )}
-          <div className="md:hidden mt-8 text-center">
-            <Button variant="outline" className="gap-2" asChild>
-              <Link href="/all">
-                Все события
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-            </Button>
-          </div>
         </div>
       </section>
     </>
