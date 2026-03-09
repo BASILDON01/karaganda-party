@@ -630,7 +630,18 @@ export default function PartyPage({ params }: { params: Promise<{ slug: string }
                   )}
 
                   <p className="text-xs text-center text-muted-foreground">
-                    Нажимая кнопку, вы соглашаетесь с условиями использования
+                    Нажимая кнопку, вы соглашаетесь с{' '}
+                    <Link href="/terms" className="text-primary hover:underline">
+                      условиями использования
+                    </Link>
+                    ,{' '}
+                    <Link href="/privacy" className="text-primary hover:underline">
+                      политикой конфиденциальности
+                    </Link>
+                    {' '}и{' '}
+                    <Link href="/cookie" className="text-primary hover:underline">
+                      политикой cookie
+                    </Link>
                   </p>
                 </div>
               </div>
