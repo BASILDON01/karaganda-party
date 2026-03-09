@@ -18,6 +18,7 @@ import {
   ImageIcon,
   MessageCircle,
   Send,
+  Download,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/auth-context';
@@ -63,6 +64,7 @@ export default function AdminPage() {
   const [featuredOrganizerIds, setFeaturedOrganizerIds] = useState<string[]>([]);
   const [organizersSaving, setOrganizersSaving] = useState(false);
   const [addOrganizerId, setAddOrganizerId] = useState('');
+  const [adminUsers, setAdminUsers] = useState<Array<{ id: string; name: string; avatar?: string; phone?: string; createdAt: string; favoritePartyIds: string[] }>>([]);
 
   useEffect(() => {
     if (!isLoading && !isAuthenticated) {
@@ -74,12 +76,13 @@ export default function AdminPage() {
     async function load() {
       setLoading(true);
       try {
-        const [pendingRes, partiesRes, statsRes, supportRes, orgRes] = await Promise.all([
+        const [pendingRes, partiesRes, statsRes, supportRes, orgRes, usersRes] = await Promise.all([
           fetch('/api/admin/parties/pending'),
           fetch('/api/parties'),
           fetch('/api/admin/stats'),
           fetch('/api/support/messages?conversations=1'),
           fetch('/api/admin/organizers'),
+          fetch('/api/admin/users'),
         ]);
         if (cancelled) return;
         if (pendingRes.status === 403 || statsRes.status === 403) {
@@ -96,12 +99,14 @@ export default function AdminPage() {
         const statsData = await statsRes.json();
         const supportData = await supportRes.json();
         const orgData = await orgRes.json();
+        const usersData = await usersRes.json();
         if (pendingData?.ok && pendingData.submissions) setSubmissions(pendingData.submissions);
         if (partiesData?.ok && partiesData.parties) setParties(partiesData.parties);
         if (statsData?.ok && statsData.stats) setStats(statsData.stats);
         if (supportData?.ok && supportData.conversations) setSupportConversations(supportData.conversations);
         if (orgData?.ok && orgData.organizers) setOrganizers(orgData.organizers);
         if (orgData?.ok && orgData.featuredIds) setFeaturedOrganizerIds(orgData.featuredIds);
+        if (usersData?.ok && Array.isArray(usersData.users)) setAdminUsers(usersData.users);
       } catch {
         if (!cancelled) toast.error('Ошибка загрузки');
       } finally {
@@ -311,6 +316,95 @@ export default function AdminPage() {
                 </div>
               </section>
             )}
+
+            {/* База пользователей */}
+            <section className="mb-10">
+              <div className="flex flex-wrap items-center justify-between gap-4 mb-4">
+                <h2 className="text-xl font-bold tracking-wider flex items-center gap-2">
+                  <Users className="w-5 h-5 text-primary" />
+                  БАЗА ПОЛЬЗОВАТЕЛЕЙ
+                </h2>
+                {adminUsers.length > 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="gap-2"
+                    onClick={() => {
+                      const BOM = '\uFEFF';
+                      const headers = ['Телеграм ID', 'Имя', 'Телефон', 'Дата регистрации', 'В избранном'];
+                      const rows = adminUsers.map((u) => [
+                        u.id,
+                        (u.name || '').replace(/"/g, '""'),
+                        (u.phone || '').replace(/"/g, '""'),
+                        u.createdAt ? new Date(u.createdAt).toLocaleDateString('ru-RU') : '',
+                        String(u.favoritePartyIds?.length ?? 0),
+                      ]);
+                      const csv = BOM + [headers.join(';'), ...rows.map((r) => r.map((c) => `"${c}"`).join(';'))].join('\r\n');
+                      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = `users-${new Date().toISOString().slice(0, 10)}.csv`;
+                      a.click();
+                      URL.revokeObjectURL(url);
+                      toast.success('Файл выгружен');
+                    }}
+                  >
+                    <Download className="w-4 h-4" />
+                    Выгрузить CSV
+                  </Button>
+                )}
+              </div>
+              {adminUsers.length === 0 ? (
+                <div className="glow-card rounded-2xl p-6 text-center text-muted-foreground">
+                  Зарегистрированных пользователей пока нет
+                </div>
+              ) : (
+                <div className="glow-card rounded-2xl overflow-hidden border border-white/10">
+                  <div className="overflow-x-auto max-h-[400px] overflow-y-auto">
+                    <table className="w-full text-sm">
+                      <thead className="sticky top-0 bg-background/95 backdrop-blur border-b border-white/10">
+                        <tr className="text-left text-muted-foreground">
+                          <th className="p-3 font-medium">Телеграм ID</th>
+                          <th className="p-3 font-medium">Имя</th>
+                          <th className="p-3 font-medium">Телефон</th>
+                          <th className="p-3 font-medium">Регистрация</th>
+                          <th className="p-3 font-medium">В избранном</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {adminUsers.map((u) => (
+                          <tr key={u.id} className="border-b border-white/5 hover:bg-white/5">
+                            <td className="p-3 font-mono text-xs">
+                              <span title="ID в Telegram">{u.id}</span>
+                            </td>
+                            <td className="p-3">
+                              <div className="flex items-center gap-2">
+                                {u.avatar ? (
+                                  <img src={u.avatar} alt="" className="w-8 h-8 rounded-full object-cover" />
+                                ) : (
+                                  <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-primary text-xs font-medium">
+                                    {(u.name || '?').slice(0, 1)}
+                                  </div>
+                                )}
+                                <span>{u.name || '—'}</span>
+                              </div>
+                            </td>
+                            <td className="p-3 text-muted-foreground font-mono text-xs">{u.phone || '—'}</td>
+                            <td className="p-3 text-muted-foreground">
+                              {u.createdAt ? new Date(u.createdAt).toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—'}
+                            </td>
+                            <td className="p-3 text-muted-foreground">
+                              {(u.favoritePartyIds?.length ?? 0) > 0 ? `${u.favoritePartyIds.length} событий` : '—'}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </section>
 
             {/* Топ организаторов */}
             <section className="mb-10">

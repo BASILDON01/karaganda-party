@@ -8,6 +8,7 @@ export type TelegramAuthPayload = {
   last_name?: string;
   username?: string;
   photo_url?: string;
+  phone_number?: string;
   auth_date: number;
   hash: string;
 };

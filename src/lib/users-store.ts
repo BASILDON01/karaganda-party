@@ -7,6 +7,7 @@ export type StoredUser = {
   id: string;
   name: string;
   avatar?: string;
+  phone?: string;
   createdAt: string;
   favoritePartyIds?: string[];
 };
@@ -46,8 +47,8 @@ export function saveUser(user: StoredUser) {
     id: user.id,
     name: user.name,
     avatar: user.avatar,
+    phone: user.phone ?? prev?.phone,
     createdAt: user.createdAt,
-    // Do not lose previously saved data (e.g. favorites).
     favoritePartyIds: user.favoritePartyIds ?? prev?.favoritePartyIds ?? [],
   };
   writeAll(data);
@@ -60,6 +61,14 @@ export function getUserById(telegramId: string): StoredUser | null {
 
 export function getUsersCount(): number {
   return Object.keys(readAll()).length;
+}
+
+/** Список всех пользователей (для админки). */
+export function getAllUsers(): StoredUser[] {
+  const data = readAll();
+  return Object.values(data).sort(
+    (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+  );
 }
 
 export function getFavoritePartyIds(userId: string): string[] {

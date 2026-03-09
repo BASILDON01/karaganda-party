@@ -30,6 +30,7 @@ function getTelegramDataFromUrl(): TelegramAuthData | null {
     last_name: params.get("last_name") ?? undefined,
     username: params.get("username") ?? undefined,
     photo_url: params.get("photo_url") ?? undefined,
+    phone_number: params.get("phone_number") ?? undefined,
     auth_date: Number(auth_date),
     hash,
   };
