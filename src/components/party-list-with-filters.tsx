@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { PartyCard } from '@/components/party-card';
@@ -115,17 +115,29 @@ export function PartyListWithFilters({ parties }: PartyListWithFiltersProps) {
   }, [parties]);
 
   const hasActiveFilters = !!q || !!tag || !!date || !!age || !!city;
+  const [filtersVisible, setFiltersVisible] = useState(true);
 
   return (
     <>
       <section className="sticky top-16 md:top-20 z-40 bg-background/80 backdrop-blur-xl border-b border-white/5 py-4">
         <div className="container mx-auto px-4">
-          <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide pb-2">
-            <Button variant="outline" size="sm" className="shrink-0 gap-2">
+          <div className="flex items-start gap-3 overflow-hidden">
+            <Button
+              variant="outline"
+              size="sm"
+              className="shrink-0 gap-2"
+              onClick={() => setFiltersVisible((v) => !v)}
+            >
               <Filter className="w-4 h-4" />
               Фильтры
             </Button>
-            <Badge
+            <div
+              className="grid min-w-0 flex-1 transition-[grid-template-rows] duration-300 ease-out"
+              style={{ gridTemplateRows: filtersVisible ? '1fr' : '0fr' }}
+            >
+              <div className="min-h-0 overflow-hidden">
+                <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide pb-2 pt-0.5">
+                  <Badge
               variant={!hasActiveFilters ? 'secondary' : 'outline'}
               className={`cursor-pointer transition-colors px-4 py-2 border-white/20 ${!hasActiveFilters ? 'bg-primary/20 text-primary' : 'hover:bg-primary hover:text-white'}`}
               onClick={() => updateParams({ q: '', tag: '', date: '', age: '', city: '' })}
@@ -180,6 +192,8 @@ export function PartyListWithFilters({ parties }: PartyListWithFiltersProps) {
             >
               21+
             </Badge>
+              </div>
+            </div>
           </div>
         </div>
       </section>
