@@ -164,6 +164,7 @@ export default function HomePage() {
             <div className="flex gap-6 text-sm text-muted-foreground">
               <Link href="/privacy" className="hover:text-white transition-colors">Политика конфиденциальности</Link>
               <Link href="/terms" className="hover:text-white transition-colors">Условия использования</Link>
+              <Link href="/cookie" className="hover:text-white transition-colors">Политика cookie</Link>
             </div>
           </div>
         </div>

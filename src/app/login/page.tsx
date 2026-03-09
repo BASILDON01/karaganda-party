@@ -196,10 +196,14 @@ export default function LoginPage() {
             Нажимая кнопку, вы соглашаетесь с{' '}
             <Link href="/terms" className="text-primary hover:underline">
               условиями использования
-            </Link>{' '}
-            и{' '}
+            </Link>
+            ,{' '}
             <Link href="/privacy" className="text-primary hover:underline">
               политикой конфиденциальности
+            </Link>
+            {' '}и{' '}
+            <Link href="/cookie" className="text-primary hover:underline">
+              политикой cookie
             </Link>
           </p>
         </div>
