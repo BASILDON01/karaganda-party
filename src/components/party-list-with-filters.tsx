@@ -138,60 +138,61 @@ export function PartyListWithFilters({ parties }: PartyListWithFiltersProps) {
               <div className="min-h-0 overflow-hidden">
                 <div className="flex items-center gap-3 overflow-x-auto scrollbar-hide pb-2 pt-0.5">
                   <Badge
-              variant={!hasActiveFilters ? 'secondary' : 'outline'}
-              className={`cursor-pointer transition-colors px-4 py-2 border-white/20 ${!hasActiveFilters ? 'bg-primary/20 text-primary' : 'hover:bg-primary hover:text-white'}`}
-              onClick={() => updateParams({ q: '', tag: '', date: '', age: '', city: '' })}
-            >
-              Все
-            </Badge>
-            <Badge
-              variant="outline"
-              className={`cursor-pointer transition-colors px-4 py-2 border-white/20 ${date === 'today' ? 'bg-primary text-primary-foreground border-primary' : 'hover:bg-primary hover:text-white'}`}
-              onClick={() => updateParams({ date: date === 'today' ? '' : 'today' })}
-            >
-              Сегодня
-            </Badge>
-            <Badge
-              variant="outline"
-              className={`cursor-pointer transition-colors px-4 py-2 border-white/20 ${date === 'weekend' ? 'bg-primary text-primary-foreground border-primary' : 'hover:bg-primary hover:text-white'}`}
-              onClick={() => updateParams({ date: date === 'weekend' ? '' : 'weekend' })}
-            >
-              Эти выходные
-            </Badge>
-            {allCities.map((c) => (
-              <Badge
-                key={c}
-                variant="outline"
-                className={`cursor-pointer transition-colors px-4 py-2 border-white/20 ${city === c ? 'bg-primary text-primary-foreground border-primary' : 'hover:bg-primary hover:text-white'}`}
-                onClick={() => updateParams({ city: city === c ? '' : c })}
-              >
-                {c}
-              </Badge>
-            ))}
-            {allHashtags.map((t) => (
-              <Badge
-                key={t}
-                variant="outline"
-                className={`cursor-pointer transition-colors px-4 py-2 border-white/20 ${tag === t ? 'bg-primary text-primary-foreground border-primary' : 'hover:bg-primary hover:text-white'}`}
-                onClick={() => updateParams({ tag: tag === t ? '' : t })}
-              >
-                #{t}
-              </Badge>
-            ))}
-            <Badge
-              variant="outline"
-              className={`cursor-pointer transition-colors px-4 py-2 border-white/20 ${age === '18' ? 'bg-primary text-primary-foreground border-primary' : 'hover:bg-primary hover:text-white'}`}
-              onClick={() => updateParams({ age: age === '18' ? '' : '18' })}
-            >
-              18+
-            </Badge>
-            <Badge
-              variant="outline"
-              className={`cursor-pointer transition-colors px-4 py-2 border-white/20 ${age === '21' ? 'bg-primary text-primary-foreground border-primary' : 'hover:bg-primary hover:text-white'}`}
-              onClick={() => updateParams({ age: age === '21' ? '' : '21' })}
-            >
-              21+
-            </Badge>
+                    variant={!hasActiveFilters ? 'secondary' : 'outline'}
+                    className={`cursor-pointer transition-colors px-4 py-2 border-white/20 ${!hasActiveFilters ? 'bg-primary/20 text-primary' : 'hover:bg-primary hover:text-white'}`}
+                    onClick={() => updateParams({ q: '', tag: '', date: '', age: '', city: '' })}
+                  >
+                    Все
+                  </Badge>
+                  <Badge
+                    variant="outline"
+                    className={`cursor-pointer transition-colors px-4 py-2 border-white/20 ${date === 'today' ? 'bg-primary text-primary-foreground border-primary' : 'hover:bg-primary hover:text-white'}`}
+                    onClick={() => updateParams({ date: date === 'today' ? '' : 'today' })}
+                  >
+                    Сегодня
+                  </Badge>
+                  <Badge
+                    variant="outline"
+                    className={`cursor-pointer transition-colors px-4 py-2 border-white/20 ${date === 'weekend' ? 'bg-primary text-primary-foreground border-primary' : 'hover:bg-primary hover:text-white'}`}
+                    onClick={() => updateParams({ date: date === 'weekend' ? '' : 'weekend' })}
+                  >
+                    Эти выходные
+                  </Badge>
+                  {allCities.map((c) => (
+                    <Badge
+                      key={c}
+                      variant="outline"
+                      className={`cursor-pointer transition-colors px-4 py-2 border-white/20 ${city === c ? 'bg-primary text-primary-foreground border-primary' : 'hover:bg-primary hover:text-white'}`}
+                      onClick={() => updateParams({ city: city === c ? '' : c })}
+                    >
+                      {c}
+                    </Badge>
+                  ))}
+                  {allHashtags.map((t) => (
+                    <Badge
+                      key={t}
+                      variant="outline"
+                      className={`cursor-pointer transition-colors px-4 py-2 border-white/20 ${tag === t ? 'bg-primary text-primary-foreground border-primary' : 'hover:bg-primary hover:text-white'}`}
+                      onClick={() => updateParams({ tag: tag === t ? '' : t })}
+                    >
+                      #{t}
+                    </Badge>
+                  ))}
+                  <Badge
+                    variant="outline"
+                    className={`cursor-pointer transition-colors px-4 py-2 border-white/20 ${age === '18' ? 'bg-primary text-primary-foreground border-primary' : 'hover:bg-primary hover:text-white'}`}
+                    onClick={() => updateParams({ age: age === '18' ? '' : '18' })}
+                  >
+                    18+
+                  </Badge>
+                  <Badge
+                    variant="outline"
+                    className={`cursor-pointer transition-colors px-4 py-2 border-white/20 ${age === '21' ? 'bg-primary text-primary-foreground border-primary' : 'hover:bg-primary hover:text-white'}`}
+                    onClick={() => updateParams({ age: age === '21' ? '' : '21' })}
+                  >
+                    21+
+                  </Badge>
+                </div>
               </div>
             </div>
           </div>
