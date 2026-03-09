@@ -115,7 +115,23 @@ export function PartyListWithFilters({ parties }: PartyListWithFiltersProps) {
   }, [parties]);
 
   const hasActiveFilters = !!q || !!tag || !!date || !!age || !!city;
-  const [filtersVisible, setFiltersVisible] = useState(true);
+
+  const [filtersVisible, setFiltersVisible] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    return localStorage.getItem('party-filters-visible') !== '0';
+  });
+
+  const toggleFiltersVisible = useCallback(() => {
+    setFiltersVisible((v) => {
+      const next = !v;
+      try {
+        localStorage.setItem('party-filters-visible', next ? '1' : '0');
+      } catch {
+        // ignore
+      }
+      return next;
+    });
+  }, []);
 
   return (
     <>
@@ -126,7 +142,7 @@ export function PartyListWithFilters({ parties }: PartyListWithFiltersProps) {
               variant="outline"
               size="sm"
               className="shrink-0 gap-2"
-              onClick={() => setFiltersVisible((v) => !v)}
+              onClick={toggleFiltersVisible}
             >
               <Filter className="w-4 h-4" />
               Фильтры
