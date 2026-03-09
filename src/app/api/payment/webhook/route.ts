@@ -5,11 +5,24 @@ import { getOrderById, getOrderByExternalId, setOrderPaid } from "@/lib/orders-s
 import { getPartyBySlug, incrementPartySold } from "@/lib/parties-store";
 import { addPurchasedTickets } from "@/lib/tickets-store";
 
+const WEBHOOK_SECRET_HEADER = "x-webhook-secret";
+
 /**
  * Вебхук от платёжного агрегатора (ApiPay и т.п.).
- * В теле запроса ожидаем: external_order_id или order_id, status = "paid" | "completed".
+ * Если задан PAYMENT_WEBHOOK_SECRET, запрос должен содержать заголовок X-Webhook-Secret с тем же значением.
  */
+function verifyWebhookSecret(req: Request): boolean {
+  const secret = process.env.PAYMENT_WEBHOOK_SECRET;
+  if (!secret) return true;
+  const header = req.headers.get(WEBHOOK_SECRET_HEADER) ?? req.headers.get("authorization")?.replace(/^Bearer\s+/i, "").trim();
+  return header === secret && secret.length > 0;
+}
+
 export async function POST(req: Request) {
+  if (!verifyWebhookSecret(req)) {
+    return NextResponse.json({ ok: false, error: "forbidden" }, { status: 403 });
+  }
+
   try {
     const body = (await req.json()) as Record<string, unknown>;
     const status = String(body.status ?? body.payment_status ?? "").toLowerCase();
